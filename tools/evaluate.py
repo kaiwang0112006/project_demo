@@ -44,8 +44,7 @@ class ks_statistic(object):
             
     def cal_ks(self,pos_label=1):
         self.fpr, self.tpr, thresholds = roc_curve(y_score=self.yprob, y_true=self.ytrue, pos_label=pos_label)
-        print(self.fpr)
-        print(self.tpr)
+
         kss = [abs(self.tpr[i]-self.fpr[i]) for i in range(len(self.fpr))]
 
         self.ks = max(kss)

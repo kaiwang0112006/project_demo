@@ -16,10 +16,6 @@ from sklearn2pmml.preprocessing import ExpressionTransformer, PMMLLabelBinarizer
 from sklearn.preprocessing import LabelBinarizer
 ##########################################################
 
-##########################################################
-
-##########################################################
-
 
 class standard_feature_kexin(object):
     def __init__(self,data,target):
@@ -37,6 +33,11 @@ class standard_feature_kexin(object):
             else:
                 self.continuousDomain.append(item)
                 self.data[item] = self.data[item]
+                
+        # for testing
+        #self.categoricalDomain = ['house_type', 'car_flg']
+        #self.data['target_1'] = 1
+        #self.continuousDomain = ['target_1']
                 
     def only_continue(self):
         self.continuousDomain = []
@@ -59,43 +60,37 @@ class standard_feature_kexin(object):
                                               missing_value_treatment = 'as_value',
                                               missing_value_replacement = 'CreditX-NA'),LabelBinarizer()])
                        for c in self.categoricalDomain] + 
-                     [(self.continuousDomain, [ContinuousDomain(invalid_value_treatment = 'as_missing',
+                     [(c, ContinuousDomain(invalid_value_treatment = 'as_missing',
                                                      missing_value_treatment = 'as_value',
-                                                     missing_value_replacement = np.nan)])],
-                     df_out = True)
-        print('target' in list(self.continuousDomain))
-        self.feature_transed = self.dfm.fit_transform(self.data)
-        print([f for f in list(self.data.columns) if f in list(self.feature_transed.columns)])
-        print(self.continuousDomain)
-        #print(self.feature_transed)
+                                                     missing_value_replacement = -1))
+                       for c in self.continuousDomain], df_out = True)
+#         self.dfm = DataFrameMapper([(c, LabelBinarizer()) for c in self.categoricalDomain]+
+#                                    [(c, None) for c in self.continuousDomain],
+#                                    df_out = True)
+        self.feature_transed = self.dfm.fit_transform(self.feature_imputed)
+
         
     def miss_inf_trans(self):
         self.imp = Imputer(missing_values='NaN', strategy='mean', axis=0,verbose=1)
-        self.imp.fit(self.feature_transed)
-        print ("1. feature.shape:",self.data.shape,type(self.data))
-        print ("2: feature_transed.shape:",self.feature_transed.shape,type(self.feature_transed))
-        feature_imputed = self.imp.transform(self.feature_transed)
-        print ("3:feature_imputed.shape:",feature_imputed.shape,type(feature_imputed))
-        print ("4:feature_transed.shape:",self.feature_transed.shape,type(self.feature_transed))
-        
-        #重新构造dataframe
-        #print('target' in list(self.feature_transed.columns))
-        self.feature_imputed = pd.DataFrame(feature_imputed, columns=list(self.feature_transed.columns))
+        feature_imputed = self.imp.fit_transform(self.data[self.continuousDomain])
+        feature_imputed_df = pd.DataFrame(feature_imputed, columns=self.continuousDomain)
+        self.data.fillna('None')
+        self.feature_imputed = pd.concat([self.data[self.categoricalDomain], feature_imputed_df],axis=1)
 
-        
+    def format_train_test(self,test_size=0.3,random_state=1992):
+        self.feature_transed[self.target] = self.feature_transed[self.target].astype(int)
+        self.Train, self.Test = train_test_split(self.feature_transed, test_size=test_size, random_state=random_state)
+
+        self.sample_y = self.Train[self.target]
+        self.sample_x = self.Train.drop(self.target,axis=1)
+        self.test_y = self.Test[self.target]
+        self.test_x = self.Test.drop(self.target,axis=1)        
+
     def apply_standardscale_classification(self,test_size=0.3,random_state=1992):
-        self.feature_imputed['target'] = self.feature_imputed['target'].astype(int)
-        self.Train, self.Test = train_test_split(self.feature_imputed, test_size=test_size, random_state=random_state)
-
-        self.sample_y = self.Train['target']
-        self.sample_x = self.Train.drop('target',axis=1)
-        self.test_y = self.Test['target']
-        self.test_x = self.Test.drop('target',axis=1)
-
+        self.format_train_test(test_size=test_size, random_state=random_state)
         self.scaler = StandardScaler().fit(self.sample_x)
         self.scaled_sample_x = self.scaler.transform(self.sample_x)
         self.scaled_test_x = self.scaler.transform(self.test_x)
-        
         
 class label_encoder(object):
     def fit_pd(self,df,cols=[]):

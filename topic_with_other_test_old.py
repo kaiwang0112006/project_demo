@@ -10,8 +10,6 @@ from sklearn.metrics import *
 from sklearn.preprocessing import StandardScaler
 from lightgbm import LGBMClassifier
 
-
-
 def main():
     topicdata = pd.read_csv(r'/project/wk/tb/20170906/user_out.csv')
     tbjxldata = pd.read_csv(r'/project/wk/tb/data/tbjxl_r360dtl_data20170713_uft8.csv')
@@ -43,15 +41,14 @@ def main():
             print("feature %s have missing %s data" % (i,str(invest[i])))
     
     # feature engineer
-    standard_feature_obj = standard_feature_tree(data, 'target')
+    standard_feature_obj = standard_feature_kexin(data, 'target')
     standard_feature_obj.categ_continue_auto()
     standard_feature_obj.miss_inf_trans()
-    standard_feature_obj.categ_label_trans()
-    standard_feature_obj.format_train_test()
-    #standard_feature_obj.apply_standardscale_classification()
+    standard_feature_obj.categ_trans()
+    standard_feature_obj.apply_standardscale_classification()
     
     # logistic
-    #model = LogisticRegression(penalty='l2', C=1.0,class_weight='balanced',solver='newton-cg')
+    # model = LogisticRegression(penalty='l2', C=1.0,class_weight='balanced',solver='newton-cg')
     model = LGBMClassifier(boosting_type='gbdt', colsample_bytree=0.55020108411564301, is_unbalance=True,
             learning_rate=0.05, max_bin=13, max_depth=4,
             max_drop=50, min_child_samples=23, min_child_weight=2,
@@ -61,7 +58,8 @@ def main():
             skip_drop=0.5, subsample=1, subsample_for_bin=50000,
             subsample_freq=5, uniform_drop=False, xgboost_dart_mode=False)
     
-    X_train = standard_feature_obj.sample_x
+    
+    X_train = standard_feature_obj.scaled_sample_x
     y_train = standard_feature_obj.sample_y
     
     model.fit(X_train, y_train)
@@ -81,7 +79,7 @@ def main():
     
     # testset evaluation
     print('testset evaluation')
-    X_test = standard_feature_obj.test_x
+    X_test = standard_feature_obj.scaled_test_x
     y_test = standard_feature_obj.test_y
     y_pred = model.predict(X_test)
     y_pred_prob = model.predict_proba(X_test)[:,0]

@@ -2,6 +2,7 @@
 import pandas as pd
 from tools.features_engine import *
 from tools.evaluate import *
+from tools.optimize import *
 
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -9,13 +10,15 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import *
 from sklearn.preprocessing import StandardScaler
 from lightgbm import LGBMClassifier
+from bayes_opt import BayesianOptimization
 
-
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import cross_val_score
 
 def main():
     topicdata = pd.read_csv(r'/project/wk/tb/20170906/user_out.csv')
     tbjxldata = pd.read_csv(r'/project/wk/tb/data/tbjxl_r360dtl_data20170713_uft8.csv')
-    tbjxldata = tbjxldata[(tbjxldata['target']!=2) & tbjxldata['flg_sample']==1] # 有卡
+    tbjxldata = tbjxldata[(tbjxldata['target']!=2) & tbjxldata['flg_sample']==1] # 鏈夊崱
 
     topicdata.rename(columns={"ugid": "user_gid"},inplace=True)
     rawdata = pd.merge(topicdata,tbjxldata,on='user_gid')
@@ -49,21 +52,47 @@ def main():
     standard_feature_obj.categ_label_trans()
     standard_feature_obj.format_train_test()
     #standard_feature_obj.apply_standardscale_classification()
-    
-    # logistic
-    #model = LogisticRegression(penalty='l2', C=1.0,class_weight='balanced',solver='newton-cg')
-    model = LGBMClassifier(boosting_type='gbdt', colsample_bytree=0.55020108411564301, is_unbalance=True,
-            learning_rate=0.05, max_bin=13, max_depth=4,
-            max_drop=50, min_child_samples=23, min_child_weight=2,
-            min_split_gain=0.074005289325428367, n_estimators=193, nthread=-1,
-            num_leaves=128, objective='binary', reg_alpha=0, reg_lambda=1,
-            scale_pos_weight=1, seed=27, sigmoid=1.0, silent=True,
-            skip_drop=0.5, subsample=1, subsample_for_bin=50000,
-            subsample_freq=5, uniform_drop=False, xgboost_dart_mode=False)
-    
     X_train = standard_feature_obj.sample_x
     y_train = standard_feature_obj.sample_y
+    # model ops
+    def gbmr_eval(**parms):
+        parms = gbm_format(parms)
+        gbmr = LGBMClassifier(**parms)
+        score =  cross_val_score(gbmr, X=X_train, y=y_train, scoring=make_scorer(score_func=accuracy_score, greater_is_better=True), cv=10, verbose=0, pre_dispatch=1)
+        return np.array(score).mean()  
+
+    num_iter = 100
+    init_points = 15
     
+    gbmrBO = BayesianOptimization(gbmr_eval, 
+                                  {
+                                    #'x_train':X_train,
+                                    #'y_train':y_train,
+                                    'num_leaves': (15, 500),
+                                    'colsample_bytree': (0.1, 1),
+                                    'drop_rate': (0.1,1),
+                                    'learning_rate': (0.001,0.05),
+                                    'max_bin':(10,100),
+                                    'max_depth':(2,20),
+                                    'min_split_gain':(0.2,0.9),
+                                    'min_child_samples':(10,200),
+                                    'n_estimators':(100,3000),
+                                    'reg_alpha':(0.1,100),
+                                    'reg_lambda':(0.1,100),
+                                    'sigmoid':(0.5,1),
+                                    'subsample':(0.1,1),
+                                    'subsample_for_bin':(10000,50000),
+                                    'subsample_freq':(1,5)
+                                  }
+                                 )
+    
+    gbmrBO.maximize()
+    print('ops results:')
+    print(gbmrBO.res['max']['max_params'])
+    
+    parms = gbm_format(gbmrBO.res['max']['max_params'])
+    model = LGBMClassifier(**parms)
+    print(model)
     model.fit(X_train, y_train)
     
     # trainingset evaluation
