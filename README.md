@@ -1,6 +1,13 @@
 # 说明
 
-关于sklearn2pmml更新后，有一个函数不能使用，重写了一个特征生成的包，使用方式为:
+关于sklearn2pmml更新后，有一个函数不能使用，出错信息:
+
+	>>> from sklearn2pmml.feature_extraction.tabular import FeatureBinarizer
+	Traceback (most recent call last):
+	  File "<stdin>", line 1, in <module>
+	ModuleNotFoundError: No module named 'sklearn2pmml.feature_extraction.tabular'
+
+重写了一个特征生成的包，使用方式为:
 
     # feature engineer
     # data是一个dataframe
