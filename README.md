@@ -19,7 +19,7 @@
     
 *standard_feature_tree* 是特征生成的的功能类，*categ_continue_auto* 是识别类别特征和连续特征，*miss_inf_trans*是对连续特征处理缺失值，*categ_label_trans* 将类别特征转化为数值，*apply_standardscale_classification* 做归一化
 
-# 更新
+# 更新 20171102
 
 封装贝叶斯优化过程
 
