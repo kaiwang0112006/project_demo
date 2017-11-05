@@ -2,8 +2,12 @@
 import pandas as pd
 import numpy as np
 from sklearn.metrics import *
+from scipy.stats import ks_2samp
 
 class ks_statistic(object):
+    '''
+    self understanding and ways to calculate ks
+    '''
     def __init__(self,yprob,ytrue):
         '''
         yprob,ytrue are list
@@ -49,3 +53,8 @@ class ks_statistic(object):
 
         self.ks = max(kss)
         
+def cal_ks_scipy(y_pred, y_true):
+    '''
+    cal ks using scipy
+    '''
+    return ks_2samp(y_pred[y_true==1], y_pred[y_true!=1]).statistic
