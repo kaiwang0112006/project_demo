@@ -66,3 +66,43 @@
     
     parms = bayesopsObj.baseparms
     model = LGBMClassifier(**parms)
+    
+# 更新 20171105
+
+封装贝叶斯优化过程模仿sklearn的方式
+
+    # model ops
+    parms =  {
+                #'x_train':X_train,
+                #'y_train':y_train,
+                'num_leaves': (15, 500),
+                'colsample_bytree': (0.1, 1),
+                'drop_rate': (0.1,1),
+                'learning_rate': (0.001,0.05),
+                'max_bin':(10,100),
+                'max_depth':(2,20),
+                'min_split_gain':(0.2,0.9),
+                'min_child_samples':(10,200),
+                'n_estimators':(100,3000),
+                'reg_alpha':(0.1,100),
+                'reg_lambda':(0.1,100),
+                'sigmoid':(0.5,1),
+                'subsample':(0.1,1),
+                'subsample_for_bin':(10000,50000),
+                'subsample_freq':(1,5)
+              }
+    # 参数整理格式，其实只需要提供parms里的参数即可
+    intdeal = ['max_bin','max_depth','max_drop','min_child_samples',
+               'min_child_weight','n_estimators','num_leaves','scale_pos_weight',
+               'subsample_for_bin','subsample_freq'] # int类参数
+    middledeal = ['colsample_bytree','drop_rate','learning_rate',
+                  'min_split_gain','skip_drop','subsample',''] # float， 只能在0，1之间
+    maxdeal = ['reg_alpha','reg_lambda','sigmoid']  # float，且可以大于1
+
+    bayesopsObj = bayes_ops(estimator=LGBMClassifier, param_grid=parms, cv=10, intdeal=intdeal, middledeal=middledeal, 
+                    maxdeal=maxdeal, 
+                    score_func=make_scorer(score_func=accuracy_score, greater_is_better=True),
+                    )
+    bayesopsObj.run(X=X_train, Y=y_train)
+    parms = bayesopsObj.baseparms
+    model = LGBMClassifier(**parms)

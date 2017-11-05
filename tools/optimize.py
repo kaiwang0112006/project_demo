@@ -24,10 +24,45 @@ def parm_format(parms, intdeal, middledeal, maxdeal):
             parms[k] = max(min(parms[k], 1), 0)
     return parms
 
+class bayes_ops(object):
+    '''
+    object that implement Bayesian Optimization using BayesianOptimization
+    (https://github.com/fmfn/BayesianOptimization)
+    '''
+    def __init__(self, estimator, param_grid, cv, intdeal, middledeal, maxdeal, score_func, num_iter=100, init_points=15):
+        '''
+        estimator need to have fit function
+        '''
+        self.estimator = estimator
+        self.parms = param_grid
+        self.cv = cv
+        self.intdeal = intdeal
+        self.middledeal = middledeal
+        self.maxdeal = maxdeal
+        self.score_func = score_func
+        self.num_iter = num_iter
+        self.init_points = init_points
+        
+
+    def _est_eval(self, **parms):
+        parms = parm_format(parms, self.intdeal, self.middledeal, self.maxdeal)
+        estmr = self.estimator(**parms)
+        score =  cross_val_score(estmr, X=self.X, y=self.Y, scoring=self.score_func, cv=self.cv, verbose=0, pre_dispatch=1)
+        return np.array(score).mean()  
+
+    def run(self, X,Y):
+        self.X = X
+        self.Y = Y
+        estmrBO = BayesianOptimization(self._est_eval, 
+                                      self.parms
+                                     )
+        
+        estmrBO.maximize()
+        self.baseparms = parm_format(estmrBO.res['max']['max_params'], intdeal, middledeal, maxdeal)
 
      
 
-class bayes_ops(object):
+class bayes_ops_bak(object):
     '''
     object that implement Bayesian Optimization using BayesianOptimization
     (https://github.com/fmfn/BayesianOptimization)
