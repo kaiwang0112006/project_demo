@@ -58,7 +58,7 @@ class bayes_ops(object):
                                      )
         
         estmrBO.maximize()
-        self.baseparms = parm_format(estmrBO.res['max']['max_params'], intdeal, middledeal, maxdeal)
+        self.baseparms = parm_format(estmrBO.res['max']['max_params'], self.intdeal, self.middledeal, self.maxdeal)
 
      
 
