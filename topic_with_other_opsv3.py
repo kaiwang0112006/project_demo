@@ -16,9 +16,9 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score
 
 def main():
-    topicdata = pd.read_csv(r'/data/work/wk/tb/20170906/user_out.csv')
+    topicdata = pd.read_csv(r'/data/work/wk/tb/20170928/user_out_16.csv')
     tbjxldata = pd.read_csv(r'/data/work/wk/tb/data/tbjxl_r360dtl_data20170713_uft8.csv')
-    tbjxldata = tbjxldata[(tbjxldata['target']!=2) & tbjxldata['flg_sample']==1] # 閺堝宕�
+    tbjxldata = tbjxldata[(tbjxldata['target']!=2) & tbjxldata['flg_sample']==1] # 闁哄牆顦畷锟�
 
     topicdata.rename(columns={"ugid": "user_gid"},inplace=True)
     rawdata = pd.merge(topicdata,tbjxldata,on='user_gid')
@@ -75,6 +75,7 @@ def main():
                 'subsample_for_bin':(10000,50000),
                 'subsample_freq':(1,5)
               }
+    
     # 参数整理格式，其实只需要提供parms里的参数即可
     intdeal = ['max_bin','max_depth','max_drop','min_child_samples',
                'min_child_weight','n_estimators','num_leaves','scale_pos_weight',
@@ -82,10 +83,11 @@ def main():
     middledeal = ['colsample_bytree','drop_rate','learning_rate',
                   'min_split_gain','skip_drop','subsample',''] # float， 只能在0，1之间
     maxdeal = ['reg_alpha','reg_lambda','sigmoid']  # float，且可以大于1
-    #bayesopsObj = bayes_ops(X=X_train, Y=y_train, estimator=LGBMClassifier)
+
     bayesopsObj = bayes_ops(estimator=LGBMClassifier, param_grid=parms, cv=10, intdeal=intdeal, middledeal=middledeal, 
                     maxdeal=maxdeal, 
                     score_func=make_scorer(score_func=accuracy_score, greater_is_better=True),
+                    init_points=5, n_iter=25, acq="ucb", kappa=10
                     )
     bayesopsObj.run(X=X_train, Y=y_train)
     parms = bayesopsObj.baseparms
