@@ -129,7 +129,7 @@ def get_day_list(startDate,endDate,format="%Y%m%d"):
 
 	return retList
 
-def sastime2standartime(t):
+def sastime2standardtime(t):
 	try:
 	    return datetime.date(1960,1,1)+datetime.timedelta(days=t)
 	except:
@@ -181,4 +181,4 @@ if __name__ == '__main__':
 	print ('retList=%s'%retList)
 	
 	print ('--------  TEST FOR get_day_list() ----------------------------')
-	print(sastime2standartime(20945))
+	print(sastime2standardtime(20945))
