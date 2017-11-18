@@ -166,6 +166,14 @@ class standard_feature_tree(object):
                 self.categoricalDomain.append(item) 
             else:
                 self.continuousDomain.append(item)
+                
+    def only_continue(self):
+        self.continuousDomain = []
+        self.categoricalDomain = []
+        for item in self.data.columns:
+            self.continuousDomain.append(item)
+            self.data[item] = self.data[item]
+
     
     def categ_label_trans(self):
         self.feature_imputed = self.le.fit_transform_pd(self.feature_imputed, self.categoricalDomain) 
