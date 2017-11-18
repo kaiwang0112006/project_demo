@@ -184,6 +184,9 @@ class standard_feature_tree(object):
         feature_imputed_df = pd.DataFrame(feature_imputed, columns=self.continuousDomain)
         self.data.fillna('None')
         self.feature_imputed = pd.concat([self.data[self.categoricalDomain], feature_imputed_df],axis=1)
+        
+    def miss_inf_not_tans(self):
+        self.feature_imputed = copy.deepcopy(self.data) 
 
     def format_train_test(self,test_size=0.3,random_state=1992):
         self.feature_imputed[self.target] = self.feature_imputed[self.target].astype(int)
