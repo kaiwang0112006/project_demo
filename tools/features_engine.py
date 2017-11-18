@@ -168,6 +168,7 @@ class standard_feature_tree(object):
                 self.continuousDomain.append(item)
                 
     def only_continue(self):
+        self.le = label_encoder()
         self.continuousDomain = []
         self.categoricalDomain = []
         for item in self.data.columns:
