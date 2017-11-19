@@ -65,3 +65,19 @@
     bayesopsObj.run(X=X_train, Y=y_train)
     parms = bayesopsObj.baseparms
     model = LGBMClassifier(**parms)
+    
+# 更新 20171119
+
+重构流水线作业的特征生产过程
+
+    # 判断连续和类别型特征
+    categoricalDomain, continuousDomain = categ_continue_auto_of_df(data,'Response')
+    print(categoricalDomain, continuousDomain)
+    
+    # 串行流水作业
+    step1 = ('infinite', InfClass(continuous=continuousDomain,method='max_min')) # 正负无穷大处理为最大最小值
+    step2 = ("imputer", ImputerClass(continuous=continuousDomain,strategy='mean'))  # 连续变量缺失值处理
+    step3 = ('onehot', OneHotClass(catego=categoricalDomain, miss='missing'))    ＃ 类别型变量独热编码
+
+    pipeline = Pipeline(steps=[step1,step2,step3])
+    newdata = pipeline.fit_transform(data)

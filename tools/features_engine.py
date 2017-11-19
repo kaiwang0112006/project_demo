@@ -6,6 +6,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import *
 from sklearn.preprocessing import *
 import copy
+from sklearn.base import *
+from sklearn.pipeline import FeatureUnion, _fit_one_transformer, _fit_transform_one, _transform_one 
+from sklearn.externals.joblib import Parallel, delayed
+from scipy import sparse
 
 ##########################################################
 # kexin needed
@@ -13,8 +17,9 @@ from sklearn_pandas import DataFrameMapper
 from sklearn2pmml.decoration import CategoricalDomain, ContinuousDomain
 from sklearn2pmml.preprocessing import ExpressionTransformer, PMMLLabelBinarizer, PMMLLabelEncoder
 #from sklearn2pmml.feature_extraction.tabular import FeatureBinarizer
-from sklearn.preprocessing import LabelBinarizer
 ##########################################################
+import logging
+logger = logging.getLogger(__name__)
 
 
 class standard_feature_kexin(object):
@@ -203,3 +208,105 @@ class standard_feature_tree(object):
         self.scaler = StandardScaler().fit(self.sample_x)
         self.scaled_sample_x = self.scaler.transform(self.sample_x)
         self.scaled_test_x = self.scaler.transform(self.test_x)
+
+
+def categ_continue_auto_of_df(df, target):
+    continuousDomain = []
+    categoricalDomain = []
+    for item in df.columns:
+        if item==target:
+            pass 
+        elif (df[item].dtypes == object)| (df[item].dtypes == bool):
+            categoricalDomain.append(item)
+        else:
+            continuousDomain.append(item)
+    return categoricalDomain, continuousDomain
+
+class OneHotClass(BaseEstimator, TransformerMixin):
+    '''
+    针对类别型变量做独热编码，并去掉NA对应的哑变量
+    '''
+    def __init__(self, catego, miss='NA'):
+        self.miss = miss
+        self.catego = catego
+    
+    def fit(self, X, y=None):
+        data = pd.get_dummies(X, columns=self.catego)
+        self.features = list(data.columns)
+        return self
+    
+    def transform(self, X, y=None):
+        data = pd.get_dummies(X, columns=self.catego)
+        feature_keep = []
+        for f in self.features:
+            if f in data and f.split('_')[-1]!=self.miss:
+                feature_keep.append(f)
+        return data[feature_keep]
+        
+    
+    def fit_transform(self, X, y=None):
+        self.fit(X)
+        data = self.transform(X)
+        
+        return data
+
+
+class ImputerClass(BaseEstimator, TransformerMixin):
+    '''
+    缺失值处理，missing_values指缺失值类型，strategy指替代策略，可以是平均值，中位数或者众数，也可以是
+    具体要替换的值。
+    
+    >>> imp = ImputerClass(continuous, missing_values='NaN', strategy='mean')
+    >>> cleandata = imp.fit(data)
+    
+    >>> imp = ImputerClass(continuous, missing_values='missing', strategy=0)
+    >>> cleandata = imp.fit(data)    
+    '''
+    def __init__(self, continuous, missing_values='NaN', strategy='mean'):
+        self.continuous = continuous
+        self.strategy = strategy
+        self.missing_values = missing_values
+        self.imputer = Imputer(missing_values=missing_values, strategy=strategy)
+        
+    def fit(self, X, y=None):
+        if self.strategy in ['mean', 'median', 'most_frequent']:
+            self.imputer.fit(X=X[self.continuous], y=y)
+        return self
+    
+    def transform(self, X, y=None):
+        if self.strategy in ['mean', 'median', 'most_frequent']:
+            X[self.continuous] = self.imputer.transform(X[self.continuous])
+        else:
+            logging.debug(self.missing_values)
+            logging.debug(self.strategy)
+            X[self.continuous] = X[self.continuous].replace(self.missing_values,self.strategy)
+        return X
+
+class InfClass(BaseEstimator, TransformerMixin):
+    '''
+    正负无穷大处理，将无穷大替换为最大最小值（method='max_min'），或者替换为任意指，如 0（method＝0）
+    '''
+    def __init__(self, continuous, method="max_min"):
+        self.continuous = continuous
+        if method == 'max_min':
+            self.maxmethod = np.max
+            self.minmethod = np.min 
+        else:
+            self.maxmethod = lambda x:method
+            self.minmethod = lambda x:method
+        #logger.debug(self.minmethod)
+            
+    def fit(self, X, y=None):
+        return self
+    
+    def transform(self, X, y=None):
+        X_copy = copy.deepcopy(X)
+        X_copy[self.continuous] = X_copy[self.continuous].replace([np.inf, -np.inf], np.nan)
+        
+        for f in self.continuous:
+            X[f] = X[f].replace(np.inf, self.maxmethod(X_copy[f]))
+            X[f] = X[f].replace(-np.inf, self.minmethod(X_copy[f]))
+        return X 
+    def fit_transform(self, X, y=None):
+        self.fit(X)
+        return self.transform(X)
