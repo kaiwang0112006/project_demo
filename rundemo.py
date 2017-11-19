@@ -27,7 +27,8 @@ def main():
     data['four'] = data['four'].fillna('missing')
     data['Ins_Age']['c'] = -np.inf 
     data['Product_Info_2']['a'] = np.inf
-    #print(data)
+    data['four']['b']='foo'
+    print(data)
     
     ###################################################################################
     # data preprocess

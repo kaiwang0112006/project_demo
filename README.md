@@ -81,3 +81,24 @@
 
     pipeline = Pipeline(steps=[step1,step2,step3])
     newdata = pipeline.fit_transform(data)
+    
+处理前的数据：
+
+	   Product_Info_2   Ins_Age     three     four Response
+	a             inf  0.879701 -0.704034      bar     True
+	b             NaN       NaN       NaN      foo      NaN
+	c       -1.327915      -inf  1.416521      bar    False
+	d             NaN       NaN       NaN  missing      NaN
+	e        2.642622 -1.017065  0.324612      bar     True
+	f        0.358531 -0.473738 -2.143172      bar     True
+	g             NaN       NaN       NaN  missing      NaN
+	h        0.431737 -0.502631 -0.352882      bar     True
+	
+处理后的数据：
+
+	   Product_Info_2   Ins_Age     three Response  four_bar  four_foo
+	a        2.642622  0.879701 -0.704034     True       1.0       0.0
+	b        0.949519 -0.426159 -0.291791      NaN       0.0       1.0
+	c       -1.327915 -1.017065  1.416521    False       1.0       0.0
+	d        0.949519 -0.426159 -0.291791      NaN       0.0       0.0
+	e        2.642622 -1.017065  0.324612     True       1.0       0.0
