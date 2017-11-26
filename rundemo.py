@@ -14,7 +14,6 @@ from sklearn.pipeline import FeatureUnion
 import logging
 logging.basicConfig(level=logging.DEBUG)
 import time
-import timeit
 
 def main():
     ###################################################################################
