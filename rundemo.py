@@ -13,6 +13,8 @@ from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import FeatureUnion
 import logging
 logging.basicConfig(level=logging.DEBUG)
+import time
+import timeit
 
 def main():
     ###################################################################################
@@ -44,6 +46,11 @@ def main():
     pipeline = Pipeline(steps=[step1,step2,step3])
     newdata = pipeline.fit_transform(data)
     print(newdata.head())
+    st = time.time()
+    #pipeline = Pipeline(steps=[step3])
+    pipeline.fit_transform(data)
+    print('time ',time.time()-st)
+    
   
     
 if __name__ == '__main__':

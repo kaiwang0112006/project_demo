@@ -277,8 +277,6 @@ class ImputerClass(BaseEstimator, TransformerMixin):
         if self.strategy in ['mean', 'median', 'most_frequent']:
             X[self.continuous] = self.imputer.transform(X[self.continuous])
         else:
-            logging.debug(self.missing_values)
-            logging.debug(self.strategy)
             X[self.continuous] = X[self.continuous].replace(self.missing_values,self.strategy)
         return X
 
