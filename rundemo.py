@@ -22,7 +22,7 @@ def main():
     #data['Response'] = data['Response'].apply(lambda x:1 if x>4 else 0)
     df = pd.DataFrame(np.random.randn(5, 3), index=['a', 'c', 'e', 'f', 'h'],columns=['Product_Info_2','Ins_Age', 'three'])
     df['four'] = 'bar'
-    
+    # add commit 
     df['Response'] = df['Product_Info_2'] > 0
     data = df.reindex(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'])
     data['four'] = data['four'].fillna('missing')
