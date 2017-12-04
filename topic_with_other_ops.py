@@ -22,7 +22,7 @@ def main():
 
     topicdata.rename(columns={"ugid": "user_gid"},inplace=True)
     rawdata = pd.merge(topicdata,tbjxldata,on='user_gid')
-
+    # test comment
     exclude = ['cust_nm', 'register_mobile', 'flg_jxl', 'flg_tb', 'flg_sample', 'user_gid', 'IDCardNO', 
                'decision_tm', 'usertype','ugid','weight','phone','id_card_1','mobile_auth','first_decision_tm','register_time','credit_history',
                'cust_nm_sha','id_card_sha','mobile_sha','cust_nm_1','target1','cust_perf','source']
