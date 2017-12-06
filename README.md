@@ -149,8 +149,8 @@
     # 串行流水作业 version 3minmaxScalerClass
     step1 = ('infinite', InfClass(continuous=continuousDomain,method='max_min')) # 正负无穷大处理为最大最小值
     step2 = ("imputer", ImputerClass(continuous=continuousDomain,strategy='mean'))  # 连续变量缺失值处理
-    step3 = ('onehot', OneHotClass(catego=categoricalDomain, miss='missing'))
-    step4 = ('MinMaxScaler', minmaxScalerClass(cols=[],target="Response"))
+    step3 = ('onehot', OneHotClass(catego=categoricalDomain, miss='missing')) # 类别特征独热编码
+    step4 = ('MinMaxScaler', minmaxScalerClass(cols=[],target="Response"))  # 最大最小值归一化
 
     pipeline = Pipeline(steps=[step1,step2,step3,step4])
     newdata = pipeline.fit_transform(data)
