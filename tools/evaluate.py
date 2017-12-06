@@ -75,5 +75,5 @@ class iv_pandas(object):
             woe, iv = self.calobj.woe_single_x(self.calobj.discrete(df[f],nsplit=nsplit),df[target],event=event)
             self.iv[f] = iv
             self.woe[f] = iv
-        return woe, iv
+        return self.woe, self.iv
             
