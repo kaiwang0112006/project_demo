@@ -102,3 +102,55 @@
 	c       -1.327915 -1.017065  1.416521    False       1.0       0.0
 	d        0.949519 -0.426159 -0.291791      NaN       0.0       0.0
 	e        2.642622 -1.017065  0.324612     True       1.0       0.0
+	
+# 更新 20171206
+
+增加label_encoder, 通过下面代码：
+
+    categoricalDomain, continuousDomain = categ_continue_auto_of_df(data,'Response')
+    print(categoricalDomain, continuousDomain)
+    
+    # 串行流水作业 version 1
+    step1 = ('infinite', InfClass(continuous=continuousDomain,method='max_min')) # 正负无穷大处理为最大最小值
+    step2 = ("imputer", ImputerClass(continuous=continuousDomain,strategy='mean'))  # 连续变量缺失值处理
+    step3 = ('label_encode', label_encoder_sk(cols=categoricalDomain))
+
+    pipeline = Pipeline(steps=[step1,step2,step3])
+    newdata = pipeline.fit_transform(data)
+    
+将原数据：
+
+	   Product_Info_2   Ins_Age     three     four Response
+	a             inf -0.347696  0.512739      bar     True
+	b             NaN       NaN       NaN      foo      NaN
+	c        0.281222      -inf -0.935522      bar     True
+	d             NaN       NaN       NaN  missing      NaN
+	e        0.015555  3.388281  0.574353      bar     True
+	f       -0.784892 -1.576177 -1.661712      bar    False
+	g             NaN       NaN       NaN  missing      NaN
+	h       -0.332099 -0.071977 -0.290078      bar    False
+	
+转化为：
+
+	   Product_Info_2   Ins_Age     three  four Response
+	a        0.281222 -0.347696  0.512739     1     True
+	b       -0.107798 -0.036749 -0.360044     2      NaN
+	c        0.281222 -1.576177 -0.935522     1     True
+	d       -0.107798 -0.036749 -0.360044     3      NaN
+	e        0.015555  3.388281  0.574353     1     True
+	
+加入最大最小值归一化：
+
+    # data preprocess version 3
+    # 判断连续和类别型特征
+    categoricalDomain, continuousDomain = categ_continue_auto_of_df(data,'Response')
+    #print(categoricalDomain, continuousDomain)
+
+    # 串行流水作业 version 3minmaxScalerClass
+    step1 = ('infinite', InfClass(continuous=continuousDomain,method='max_min')) # 正负无穷大处理为最大最小值
+    step2 = ("imputer", ImputerClass(continuous=continuousDomain,strategy='mean'))  # 连续变量缺失值处理
+    step3 = ('onehot', OneHotClass(catego=categoricalDomain, miss='missing'))
+    step4 = ('MinMaxScaler', minmaxScalerClass(cols=[],target="Response"))
+
+    pipeline = Pipeline(steps=[step1,step2,step3,step4])
+    newdata = pipeline.fit_transform(data)

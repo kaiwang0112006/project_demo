@@ -30,25 +30,53 @@ def main():
     data['Product_Info_2']['a'] = np.inf
     data['four']['b']='foo'
     print(data)
-    
+    print('\n')
     ###################################################################################
-    # data preprocess
+    # data preprocess version 1
     # 判断连续和类别型特征
     categoricalDomain, continuousDomain = categ_continue_auto_of_df(data,'Response')
-    print(categoricalDomain, continuousDomain)
+    #print(categoricalDomain, continuousDomain)
     
-    # 串行流水作业
+    # 串行流水作业 version 1
     step1 = ('infinite', InfClass(continuous=continuousDomain,method='max_min')) # 正负无穷大处理为最大最小值
     step2 = ("imputer", ImputerClass(continuous=continuousDomain,strategy='mean'))  # 连续变量缺失值处理
     step3 = ('onehot', OneHotClass(catego=categoricalDomain, miss='missing'))
 
     pipeline = Pipeline(steps=[step1,step2,step3])
     newdata = pipeline.fit_transform(data)
+    #print(newdata.head())
+    
+    ###################################################################################
+    # data preprocess version 2
+    # 判断连续和类别型特征
+    #print(categoricalDomain, continuousDomain)
+    
+    # 串行流水作业 version 2
+    step1 = ('infinite', InfClass(continuous=continuousDomain,method='max_min')) # 正负无穷大处理为最大最小值
+    step2 = ("imputer", ImputerClass(continuous=continuousDomain,strategy='mean'))  # 连续变量缺失值处理
+    step3 = ('label_encode', label_encoder_sk(cols=categoricalDomain))
+
+    pipeline = Pipeline(steps=[step1,step2,step3])
+    newdata = pipeline.fit_transform(data)
+    #print(newdata.head())
+    
+    ###################################################################################
+    # data preprocess version 3
+    # 判断连续和类别型特征
+    categoricalDomain, continuousDomain = categ_continue_auto_of_df(data,'Response')
+    #print(categoricalDomain, continuousDomain)
+
+    # 串行流水作业 version 3minmaxScalerClass
+    step1 = ('infinite', InfClass(continuous=continuousDomain,method='max_min')) # 正负无穷大处理为最大最小值
+    step2 = ("imputer", ImputerClass(continuous=continuousDomain,strategy='mean'))  # 连续变量缺失值处理
+    step3 = ('onehot', OneHotClass(catego=categoricalDomain, miss='missing'))
+    step4 = ('MinMaxScaler', minmaxScalerClass(cols=[],target="Response"))
+
+    pipeline = Pipeline(steps=[step1,step2,step3,step4])
+    newdata = pipeline.fit_transform(data)
+
     print(newdata.head())
-    st = time.time()
-    #pipeline = Pipeline(steps=[step3])
-    pipeline.fit_transform(data)
-    print('time ',time.time()-st)
+
     
   
     

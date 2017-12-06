@@ -243,12 +243,6 @@ class OneHotClass(BaseEstimator, TransformerMixin):
                 feature_keep.append(f)
         return data[feature_keep]
         
-    
-    def fit_transform(self, X, y=None):
-        self.fit(X)
-        data = self.transform(X)
-        
-        return data
 
 
 class ImputerClass(BaseEstimator, TransformerMixin):
@@ -305,6 +299,66 @@ class InfClass(BaseEstimator, TransformerMixin):
             X[f] = X[f].replace(np.inf, self.maxmethod(X_copy[f]))
             X[f] = X[f].replace(-np.inf, self.minmethod(X_copy[f]))
         return X 
-    def fit_transform(self, X, y=None):
-        self.fit(X)
-        return self.transform(X)
+
+class label_encoder_sk(BaseEstimator, TransformerMixin):
+    '''
+    类sklearn的方法做label_encoder,如果fit给定的columns是空的，对所有列处理
+    '''
+    def __init__(self, cols):
+        self.cols = cols
+        self.class_index = {}
+    
+    def fit(self,X,y=None):
+        '''
+        fit all columns in the df or specific list. 
+        generate a dict:
+        {feature1:{label1:1,label2:2}, feature2:{label1:1,label2:2}...}
+        '''
+        if len(self.cols) == 0:
+            self.cols = df.columns
+        self.class_index = {}
+        for f in self.cols:
+            uf = X[f].unique()
+            self.class_index[f] = {}
+            index = 1
+            for item in uf:
+                self.class_index[f][item] = index
+                index += 1
+        return self
+    
+    def transform(self,X,y=None):
+        '''
+        transform all columns in the df or specific list from lable to index, return an update dataframe.
+        '''
+        newdf = copy.deepcopy(X)
+        for f in self.cols:
+            if f in self.class_index:
+                newdf[f] = X[f].apply(lambda d: self.update_label(f,d))
+        return newdf
+                
+    def update_label(self,f,x):
+        '''
+        update the label to index, if not found in the dict, add and update the dict.
+        '''
+        try:
+            return self.class_index[f][x]
+        except:
+            self.class_index[f][x] = max(self.class_index[f].values())+1
+            return self.class_index[f][x]
+        
+class minmaxScalerClass(BaseEstimator, TransformerMixin):
+    def __init__(self,cols,target):
+        self.cols = cols 
+        self.target = target
+        self.scaler = MinMaxScaler()
+        
+    def fit(self,X,y=None):
+        if len(self.cols) == 0:
+            self.cols = [f for f in X.columns if f!=self.target]
+        self.scaler.fit(X[self.cols])
+        return self 
+    
+    def transform(self,X,y=None):
+        X[self.cols] = self.scaler.transform(X[self.cols])
+        return X
+        
