@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics import *
 from scipy.stats import ks_2samp
+from .information_value import *
 
 class ks_statistic(object):
     '''
@@ -58,3 +59,21 @@ def cal_ks_scipy(y_pred, y_true):
     cal ks using scipy
     '''
     return ks_2samp(y_pred[y_true==1], y_pred[y_true!=1]).statistic
+
+class iv_pandas(object):
+    '''
+    对IV计算的工具封装成适用于pandas输入, 返回结果一个是woe，格式为：{feature:{分箱id:woe}}, 另一个是iv，格式为 {feature:iv值}
+    '''
+    def __init__(self):
+        self.calobj = WOE()
+
+    def cal_woe_iv(self,df,cols,target,nsplit=10,event=1):
+        self.woe = {}
+        self.iv = {}
+        
+        for f in cols:
+            woe, iv = self.calobj.woe_single_x(self.calobj.discrete(df[f],nsplit=nsplit),df[target],event=event)
+            self.iv[f] = iv
+            self.woe[f] = iv
+        return woe, iv
+            

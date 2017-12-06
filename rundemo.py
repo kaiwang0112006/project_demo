@@ -2,6 +2,7 @@
 
 import pandas as pd
 from tools.features_engine import *
+from tools.evaluate import *
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -11,11 +12,12 @@ from sklearn.pipeline import *
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import FeatureUnion
+from sklearn import datasets
 import logging
 logging.basicConfig(level=logging.DEBUG)
 import time
 
-def main():
+def feature_engine_test():
     ###################################################################################
     # make data
     #data = pd.read_csv('/Users/wangkai/Documents/eclipse_workspace/pythondaily/mykaggle_prudential/prudential/train.csv')
@@ -78,7 +80,18 @@ def main():
     print(newdata.head())
 
     
-  
+def main():
+    df = datasets.load_breast_cancer()
+    ivobj = iv_pandas()
+    datadf = pd.DataFrame(df.data,columns=[str(i) for i in range(30)])
+    datadf['target'] = df.target
+    #print(datadf.head())
+    x=datadf['1']
+
+    woe, iv = ivobj.cal_woe_iv(datadf,['1','2'],'target',nsplit=10,event=1)
+    print(woe)
+    print(iv)
+    
     
 if __name__ == '__main__':
     main()
