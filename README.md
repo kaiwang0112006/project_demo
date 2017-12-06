@@ -154,3 +154,15 @@
 
     pipeline = Pipeline(steps=[step1,step2,step3,step4])
     newdata = pipeline.fit_transform(data)
+    
+加入iv值计算:
+
+    df = datasets.load_breast_cancer()
+    ivobj = iv_pandas()
+    datadf = pd.DataFrame(df.data,columns=[str(i) for i in range(30)])
+    datadf['target'] = df.target
+    #print(datadf.head())
+    x=datadf['1']
+
+    woe, iv = ivobj.cal_woe_iv(datadf,['1','2'],'target',nsplit=10,event=1)
+    print(iv) # iv结果是 {'1': 1.2674164699321071, '2': 2.9048936041315248}
