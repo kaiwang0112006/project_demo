@@ -11,11 +11,11 @@ TAOBAOFILE = os.path.join(BASE_DIR, 'userdicts', 'taobao.txt')
 STOPWORDSFILE = os.path.join(BASE_DIR, 'userdicts', 'stopwords.txt')
 
 stopwords = {}
-with open(STOPWORDSFILE) as fin:
-    for eachline in fin:
-        stopwords[eachline.strip()] = 1
-
-jieba.load_userdict(TAOBAOFILE)
+# with open(STOPWORDSFILE) as fin:
+#     for eachline in fin:
+#         stopwords[eachline.strip()] = 1
+# 
+# jieba.load_userdict(TAOBAOFILE)
 
 def jieba_cut(sentence,keywords=[],empty='NA'):
     '''
@@ -47,10 +47,19 @@ def jieba_str(x,keywordsdict={}):
     segr = [i.encode('utf-8') for i in seg]
     return ','.join(segr)
 
-def jieba_cut_3(sentence,keywords=[],empty='NA'):
+def jieba_cut_3(sentence,keywords=[],empty='NA',stopwordsfile='',definefile=''):
     '''
     cut sentence with jieba and only keep keywords filtered by word count.
     '''
+    stopwords = {}
+    if stopwordsfile:
+        with open(STOPWORDSFILE) as fin:
+            for eachline in fin:
+                stopwords[eachline.strip()] = 1
+                
+    if definefile:
+        jieba.load_userdict(TAOBAOFILE)
+        
     
     num_list = ['0','1','2','3','4','5','6','7','8','9']
     seg = [s for s in list(jieba.cut(sentence)) if len(s)>1 and s not in stopwords and (u'\u4e00' <= s <= u'\u9fff') and s not in num_list]
