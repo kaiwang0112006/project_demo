@@ -14,6 +14,10 @@ from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import FeatureUnion
 from sklearn import datasets
 import logging
+from sklearn2pmml import PMMLPipeline
+from sklearn.tree import DecisionTreeClassifier
+from sklearn2pmml import sklearn2pmml
+
 logging.basicConfig(level=logging.DEBUG)
 import time
 
@@ -77,10 +81,11 @@ def feature_engine_test():
     pipeline = Pipeline(steps=[step1,step2,step3,step4])
     newdata = pipeline.fit_transform(data)
 
-    print(newdata.head())
 
     
 def main():
+    feature_engine_test()
+    exit(0)
     df = datasets.load_breast_cancer()
     ivobj = iv_pandas()
     datadf = pd.DataFrame(df.data,columns=[str(i) for i in range(30)])

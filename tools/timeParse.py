@@ -3,7 +3,17 @@
 import datetime 
 import time 
 import traceback
+import calendar
 
+def get_month_short_map_num():
+    return {v: k for k,v in enumerate(calendar.month_abbr)}
+
+def get_month_daylist(year,month,formats="%Y%m%d"):
+	num_days = calendar.monthrange(year, month)[1]
+	start = datetime.date(year=year,month=month,day=1)
+	end = datetime.date(year=year,month=month,day=num_days)
+	return get_day_list(start,end,formats)
+	
 
 def getOneDayDelta():
 
@@ -182,3 +192,6 @@ if __name__ == '__main__':
 	
 	print ('--------  TEST FOR get_day_list() ----------------------------')
 	print(sastime2standardtime(20945))
+	
+	print ('--------  TEST FOR get_month_daylist() ----------------------------')
+	print(get_month_daylist(2017,4))
