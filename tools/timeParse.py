@@ -141,7 +141,7 @@ def get_day_list(startDate,endDate,format="%Y%m%d"):
 
 def sastime2standardtime(t):
 	try:
-	    return datetime.date(1960,1,1)+datetime.timedelta(days=t)
+	    return datetime.date(1960,1,1)+datetime.timedelta(days=int(t))
 	except:
 		#traceback.print_exc()
 		return 'NA'
