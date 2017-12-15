@@ -20,7 +20,6 @@ def idstr(s):
 def masktry(s):
     s = s.upper()
     s =  idstr(s)
-    print(s)
     if s.lower()!= 'nan':
         return maskstr(s)
     return s
