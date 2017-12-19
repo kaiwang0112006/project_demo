@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 ## Options and defaults
 ##########################################
 def getOptions():
-    parser = argparse.ArgumentParser(description='python *.py [option]"')
+    parser = argparse.ArgumentParser(description='python *.py [option], convert all sas7bdat file in a folder to csv')
     requiredgroup = parser.add_argument_group('required arguments')
     requiredgroup.add_argument('--path', dest='path', help='path of dir', default='', required=True)
     parser.add_argument('--worker',dest='worker',help='worker for multiprocess, 0 mean all', default=0, type=int)
