@@ -5,6 +5,10 @@ import time
 import traceback
 import calendar
 
+
+MONTH = {'JAN':1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7,"AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12}
+
+
 def get_month_short_map_num():
     return {v: k for k,v in enumerate(calendar.month_abbr)}
 
@@ -139,13 +143,32 @@ def get_day_list(startDate,endDate,format="%Y%m%d"):
 
 	return retList
 
-def sastime2standardtime(t):
+def sastime2standarddate(t):
 	try:
-	    return datetime.date(1960,1,1)+datetime.timedelta(days=int(t))
+	    return datetime.date(1960,1,1)+datetime.timedelta(days=int(float(t)))
 	except:
 		#traceback.print_exc()
-		return 'NA'
+		return 'NA' 
 
+def sastime2standarddatetime(t):
+    '''
+    input as "20924"
+    '''
+    try:
+        return datetime.datetime(1960,1,1)+datetime.timedelta(days=int(float(t)))
+    except:
+        #traceback.print_exc()
+        return 'NA'
+    
+def sasdt2standarddatetime(t):
+    '''
+    input as "10JUL2017"
+    '''
+    day = int(d[:2])
+    month = MONTH[d[2:5]]
+    year = int(d[5:9])
+    
+    return datetime.datetime(year=year,month=month,day=day)
 
 ##  测试代码 
 
