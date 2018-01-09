@@ -164,9 +164,9 @@ def sasdt2standarddatetime(t):
     '''
     input as "10JUL2017"
     '''
-    day = int(d[:2])
-    month = MONTH[d[2:5]]
-    year = int(d[5:9])
+    day = int(t[:2])
+    month = MONTH[t[2:5]]
+    year = int(t[5:9])
     
     return datetime.datetime(year=year,month=month,day=day)
 
