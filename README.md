@@ -166,3 +166,15 @@
 
     woe, iv = ivobj.cal_woe_iv(datadf,['1','2'],'target',nsplit=10,event=1)
     print(iv) # iv结果是 {'1': 1.2674164699321071, '2': 2.9048936041315248}
+    
+# 更新 20180110
+
+unix时间戳指定时区转换
+
+    from project_demo.tools.timeParse import *
+    
+    tz_utc_0 = datetime.timezone(datetime.timedelta(hours=0))
+    tz_utc_8 = datetime.timezone(datetime.timedelta(hours=8))
+    print(unix2datetime(1503676813732,tz_utc_0,'s')) # 转换为0时区,单位秒
+    print(unix2datetime(1503676813732,tz_utc_8,'ms')) # 转化为东八区，单位毫秒
+    
