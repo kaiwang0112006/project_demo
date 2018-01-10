@@ -170,51 +170,83 @@ def sasdt2standarddatetime(t):
     
     return datetime.datetime(year=year,month=month,day=day)
 
+def unix2datetime_auto(t,tz):
+    try:
+        t = int(t)
+    except:
+        return "format error"
+    
+    if t>1e12:
+        s = t/1000
+    else:
+        s = t
+
+    return datetime.datetime.fromtimestamp(s,tz=tz)
+
+
+def unix2datetime(t,tz,unit="s"):
+    '''
+    unit 可以是s和ms
+    '''
+    try:
+        t = int(t)
+    except:
+        return "format error"
+    
+    if unit=='s':
+        return datetime.datetime.fromtimestamp(t,tz=tz)
+    else:
+        return datetime.datetime.fromtimestamp(t/1000,tz=tz)
+
 ##  测试代码 
 
 if __name__ == '__main__':
 
-	print ('--------  TEST FOR getDateDiffInDay() -----------------------------')
-
-	startDate = datetime.datetime.strptime('2010-07-01','%Y-%m-%d')
-
-	endDate = datetime.datetime.strptime('2010-07-01','%Y-%m-%d')
-
-	print ('startDate=%s,endDate=%s'%(startDate,endDate))
-
-	diff = getDateDiffInDay(startDate,endDate)
-
-	print ('diff=%d'%diff)
-
-	
-
-	print ('--------  TEST FOR get_month_list() ----------------------------')
-
-	startDate = datetime.datetime.strptime('2010-04-02','%Y-%m-%d')
-
-	endDate = datetime.datetime.strptime('2010-07-28','%Y-%m-%d')
-
-	print ('startDate=%s,endDate=%s'%(startDate,endDate))
-
-	retList = get_month_list(startDate, endDate, '%Y%m')
-
-	print ('retList=%s'%retList)
-
-
-	print ('--------  TEST FOR get_day_list() ----------------------------')
-
-	startDate = datetime.datetime.strptime('2017-07-28','%Y-%m-%d')
-
-	endDate = datetime.datetime.strptime('2016-08-02','%Y-%m-%d')
-
-	print ('startDate=%s,endDate=%s'%(startDate,endDate))
-
-	retList = get_day_list(startDate, endDate)
-
-	print ('retList=%s'%retList)
-	
-	print ('--------  TEST FOR get_day_list() ----------------------------')
-	print(sastime2standardtime(20945))
-	
-	print ('--------  TEST FOR get_month_daylist() ----------------------------')
-	print(get_month_daylist(2017,4))
+    print ('--------  TEST FOR getDateDiffInDay() -----------------------------')
+    
+    startDate = datetime.datetime.strptime('2010-07-01','%Y-%m-%d')
+    
+    endDate = datetime.datetime.strptime('2010-07-01','%Y-%m-%d')
+    
+    print ('startDate=%s,endDate=%s'%(startDate,endDate))
+    
+    diff = getDateDiffInDay(startDate,endDate)
+    
+    print ('diff=%d'%diff)
+    
+    print ('--------  TEST FOR get_month_list() ----------------------------')
+    
+    startDate = datetime.datetime.strptime('2010-04-02','%Y-%m-%d')
+    
+    endDate = datetime.datetime.strptime('2010-07-28','%Y-%m-%d')
+    
+    print ('startDate=%s,endDate=%s'%(startDate,endDate))
+    
+    retList = get_month_list(startDate, endDate, '%Y%m')
+    
+    print ('retList=%s'%retList)
+    
+    
+    print ('--------  TEST FOR get_day_list() ----------------------------')
+    
+    startDate = datetime.datetime.strptime('2017-07-28','%Y-%m-%d')
+    
+    endDate = datetime.datetime.strptime('2016-08-02','%Y-%m-%d')
+    
+    print ('startDate=%s,endDate=%s'%(startDate,endDate))
+    
+    retList = get_day_list(startDate, endDate)
+    
+    print ('retList=%s'%retList)
+    
+    print ('--------  TEST FOR get_day_list() ----------------------------')
+    print(sastime2standardtime(20945))
+    
+    print ('--------  TEST FOR get_month_daylist() ----------------------------')
+    print(get_month_daylist(2017,4))
+    
+    print('--------  TEST FOR unix2datetime ----------------------------')
+    tz_utc_0 = datetime.timezone(datetime.timedelta(hours=0))
+    tz_utc_8 = datetime.timezone(datetime.timedelta(hours=8))
+    print(unix2datetime(1503676813732,tz_utc_0))
+    print(unix2datetime(1503676813732,tz_utc_8))

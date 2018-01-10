@@ -20,6 +20,10 @@ def apply_df(args):
     
     return df 
 
+def apply_row_series(args):
+    df, func, kwargs = args
+    datadf = df.apply(func, **kwargs, axis=1) # func need to return a pd.Series
+    return datadf
 
 def apply_by_multiprocessing(df, func, **kwargs):
     workers = kwargs.pop('workers', multiprocessing.cpu_count() - 1)
@@ -29,6 +33,16 @@ def apply_by_multiprocessing(df, func, **kwargs):
         
     pool = multiprocessing.Pool(processes=workers)
     result = pool.map(apply_df, [(d, func, key,target, kwargs)
+                                  for d in np.array_split(df, workers)])
+    pool.close()
+    return pd.concat(list(result))
+
+def apply_row_by_multiprocessing(df, func, **kwargs):
+    workers = kwargs.pop('workers', multiprocessing.cpu_count() - 1)
+    #with multiprocessing.Pool(processes=workers) as pool:
+        
+    pool = multiprocessing.Pool(processes=workers)
+    result = pool.map(apply_row_series, [(d, func, kwargs)
                                   for d in np.array_split(df, workers)])
     pool.close()
     return pd.concat(list(result))
