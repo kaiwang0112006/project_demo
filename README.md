@@ -1,16 +1,16 @@
-# ËµÃ÷
+# è¯´æ˜
 
-¹ØÓÚsklearn2pmml¸üĞÂºó£¬ÓĞÒ»¸öº¯Êı²»ÄÜÊ¹ÓÃ£¬³ö´íĞÅÏ¢:
+å…³äºsklearn2pmmlæ›´æ–°åï¼Œæœ‰ä¸€ä¸ªå‡½æ•°ä¸èƒ½ä½¿ç”¨ï¼Œå‡ºé”™ä¿¡æ¯:
 
 	>>> from sklearn2pmml.feature_extraction.tabular import FeatureBinarizer
 	Traceback (most recent call last):
 	  File "<stdin>", line 1, in <module>
 	ModuleNotFoundError: No module named 'sklearn2pmml.feature_extraction.tabular'
 
-ÖØĞ´ÁËÒ»¸öÌØÕ÷Éú³ÉµÄ°ü£¬Ê¹ÓÃ·½Ê½Îª:
+é‡å†™äº†ä¸€ä¸ªç‰¹å¾ç”Ÿæˆçš„åŒ…ï¼Œä½¿ç”¨æ–¹å¼ä¸º:
 
     # feature engineer
-    # dataÊÇÒ»¸ödataframe
+    # dataæ˜¯ä¸€ä¸ªdataframe
     standard_feature_obj = standard_feature_tree(data, 'target')
     standard_feature_obj.categ_continue_auto()
     standard_feature_obj.miss_inf_trans()
@@ -24,11 +24,11 @@
     
     model.fit(X_train, y_train)
     
-*standard_feature_tree* ÊÇÌØÕ÷Éú³ÉµÄµÄ¹¦ÄÜÀà£¬*categ_continue_auto* ÊÇÊ¶±ğÀà±ğÌØÕ÷ºÍÁ¬ĞøÌØÕ÷£¬*miss_inf_trans*ÊÇ¶ÔÁ¬ĞøÌØÕ÷´¦ÀíÈ±Ê§Öµ£¬*categ_label_trans* ½«Àà±ğÌØÕ÷×ª»¯ÎªÊıÖµ£¬*apply_standardscale_classification* ×ö¹éÒ»»¯
+*standard_feature_tree* æ˜¯ç‰¹å¾ç”Ÿæˆçš„çš„åŠŸèƒ½ç±»ï¼Œ*categ_continue_auto* æ˜¯è¯†åˆ«ç±»åˆ«ç‰¹å¾å’Œè¿ç»­ç‰¹å¾ï¼Œ*miss_inf_trans*æ˜¯å¯¹è¿ç»­ç‰¹å¾å¤„ç†ç¼ºå¤±å€¼ï¼Œ*categ_label_trans* å°†ç±»åˆ«ç‰¹å¾è½¬åŒ–ä¸ºæ•°å€¼ï¼Œ*apply_standardscale_classification* åšå½’ä¸€åŒ–
 
-# ¸üĞÂ 20171105
+# æ›´æ–° 20171105
 
-·â×°±´Ò¶Ë¹ÓÅ»¯¹ı³ÌÄ£·ÂsklearnµÄ·½Ê½
+å°è£…è´å¶æ–¯ä¼˜åŒ–è¿‡ç¨‹æ¨¡ä»¿sklearnçš„æ–¹å¼
 
     # model ops
     parms =  {
@@ -50,13 +50,13 @@
                 'subsample_for_bin':(10000,50000),
                 'subsample_freq':(1,5)
               }
-    # ²ÎÊıÕûÀí¸ñÊ½£¬ÆäÊµÖ»ĞèÒªÌá¹©parmsÀïµÄ²ÎÊı¼´¿É
+    # å‚æ•°æ•´ç†æ ¼å¼ï¼Œå…¶å®åªéœ€è¦æä¾›parmsé‡Œçš„å‚æ•°å³å¯
     intdeal = ['max_bin','max_depth','max_drop','min_child_samples',
                'min_child_weight','n_estimators','num_leaves','scale_pos_weight',
-               'subsample_for_bin','subsample_freq'] # intÀà²ÎÊı
+               'subsample_for_bin','subsample_freq'] # intç±»å‚æ•°
     middledeal = ['colsample_bytree','drop_rate','learning_rate',
-                  'min_split_gain','skip_drop','subsample',''] # float£¬ Ö»ÄÜÔÚ0£¬1Ö®¼ä
-    maxdeal = ['reg_alpha','reg_lambda','sigmoid']  # float£¬ÇÒ¿ÉÒÔ´óÓÚ1
+                  'min_split_gain','skip_drop','subsample',''] # floatï¼Œ åªèƒ½åœ¨0ï¼Œ1ä¹‹é—´
+    maxdeal = ['reg_alpha','reg_lambda','sigmoid']  # floatï¼Œä¸”å¯ä»¥å¤§äº1
 
     bayesopsObj = bayes_ops(estimator=LGBMClassifier, param_grid=parms, cv=10, intdeal=intdeal, middledeal=middledeal, 
                     maxdeal=maxdeal, 
@@ -66,23 +66,23 @@
     parms = bayesopsObj.baseparms
     model = LGBMClassifier(**parms)
     
-# ¸üĞÂ 20171119
+# æ›´æ–° 20171119
 
-ÖØ¹¹Á÷Ë®Ïß×÷ÒµµÄÌØÕ÷Éú²ú¹ı³Ì
+é‡æ„æµæ°´çº¿ä½œä¸šçš„ç‰¹å¾ç”Ÿäº§è¿‡ç¨‹
 
-    # ÅĞ¶ÏÁ¬ĞøºÍÀà±ğĞÍÌØÕ÷
+    # åˆ¤æ–­è¿ç»­å’Œç±»åˆ«å‹ç‰¹å¾
     categoricalDomain, continuousDomain = categ_continue_auto_of_df(data,'Response')
     print(categoricalDomain, continuousDomain)
     
-    # ´®ĞĞÁ÷Ë®×÷Òµ
-    step1 = ('infinite', InfClass(continuous=continuousDomain,method='max_min')) # Õı¸ºÎŞÇî´ó´¦ÀíÎª×î´ó×îĞ¡Öµ
-    step2 = ("imputer", ImputerClass(continuous=continuousDomain,strategy='mean'))  # Á¬Ğø±äÁ¿È±Ê§Öµ´¦Àí
-    step3 = ('onehot', OneHotClass(catego=categoricalDomain, miss='missing'))    ££ Àà±ğĞÍ±äÁ¿¶ÀÈÈ±àÂë
+    # ä¸²è¡Œæµæ°´ä½œä¸š
+    step1 = ('infinite', InfClass(continuous=continuousDomain,method='max_min')) # æ­£è´Ÿæ— ç©·å¤§å¤„ç†ä¸ºæœ€å¤§æœ€å°å€¼
+    step2 = ("imputer", ImputerClass(continuous=continuousDomain,strategy='mean'))  # è¿ç»­å˜é‡ç¼ºå¤±å€¼å¤„ç†
+    step3 = ('onehot', OneHotClass(catego=categoricalDomain, miss='missing'))    ï¼ƒ ç±»åˆ«å‹å˜é‡ç‹¬çƒ­ç¼–ç 
 
     pipeline = Pipeline(steps=[step1,step2,step3])
     newdata = pipeline.fit_transform(data)
     
-´¦ÀíÇ°µÄÊı¾İ£º
+å¤„ç†å‰çš„æ•°æ®ï¼š
 
 	   Product_Info_2   Ins_Age     three     four Response
 	a             inf  0.879701 -0.704034      bar     True
@@ -94,7 +94,7 @@
 	g             NaN       NaN       NaN  missing      NaN
 	h        0.431737 -0.502631 -0.352882      bar     True
 	
-´¦ÀíºóµÄÊı¾İ£º
+å¤„ç†åçš„æ•°æ®ï¼š
 
 	   Product_Info_2   Ins_Age     three Response  four_bar  four_foo
 	a        2.642622  0.879701 -0.704034     True       1.0       0.0
@@ -103,22 +103,22 @@
 	d        0.949519 -0.426159 -0.291791      NaN       0.0       0.0
 	e        2.642622 -1.017065  0.324612     True       1.0       0.0
 	
-# ¸üĞÂ 20171206
+# æ›´æ–° 20171206
 
-Ôö¼Ólabel_encoder, Í¨¹ıÏÂÃæ´úÂë£º
+å¢åŠ label_encoder, é€šè¿‡ä¸‹é¢ä»£ç ï¼š
 
     categoricalDomain, continuousDomain = categ_continue_auto_of_df(data,'Response')
     print(categoricalDomain, continuousDomain)
     
-    # ´®ĞĞÁ÷Ë®×÷Òµ version 1
-    step1 = ('infinite', InfClass(continuous=continuousDomain,method='max_min')) # Õı¸ºÎŞÇî´ó´¦ÀíÎª×î´ó×îĞ¡Öµ
-    step2 = ("imputer", ImputerClass(continuous=continuousDomain,strategy='mean'))  # Á¬Ğø±äÁ¿È±Ê§Öµ´¦Àí
+    # ä¸²è¡Œæµæ°´ä½œä¸š version 1
+    step1 = ('infinite', InfClass(continuous=continuousDomain,method='max_min')) # æ­£è´Ÿæ— ç©·å¤§å¤„ç†ä¸ºæœ€å¤§æœ€å°å€¼
+    step2 = ("imputer", ImputerClass(continuous=continuousDomain,strategy='mean'))  # è¿ç»­å˜é‡ç¼ºå¤±å€¼å¤„ç†
     step3 = ('label_encode', label_encoder_sk(cols=categoricalDomain))
 
     pipeline = Pipeline(steps=[step1,step2,step3])
     newdata = pipeline.fit_transform(data)
     
-½«Ô­Êı¾İ£º
+å°†åŸæ•°æ®ï¼š
 
 	   Product_Info_2   Ins_Age     three     four Response
 	a             inf -0.347696  0.512739      bar     True
@@ -130,7 +130,7 @@
 	g             NaN       NaN       NaN  missing      NaN
 	h       -0.332099 -0.071977 -0.290078      bar    False
 	
-×ª»¯Îª£º
+è½¬åŒ–ä¸ºï¼š
 
 	   Product_Info_2   Ins_Age     three  four Response
 	a        0.281222 -0.347696  0.512739     1     True
@@ -139,23 +139,23 @@
 	d       -0.107798 -0.036749 -0.360044     3      NaN
 	e        0.015555  3.388281  0.574353     1     True
 	
-¼ÓÈë×î´ó×îĞ¡Öµ¹éÒ»»¯£º
+åŠ å…¥æœ€å¤§æœ€å°å€¼å½’ä¸€åŒ–ï¼š
 
     # data preprocess version 3
-    # ÅĞ¶ÏÁ¬ĞøºÍÀà±ğĞÍÌØÕ÷
+    # åˆ¤æ–­è¿ç»­å’Œç±»åˆ«å‹ç‰¹å¾
     categoricalDomain, continuousDomain = categ_continue_auto_of_df(data,'Response')
     #print(categoricalDomain, continuousDomain)
 
-    # ´®ĞĞÁ÷Ë®×÷Òµ version 3minmaxScalerClass
-    step1 = ('infinite', InfClass(continuous=continuousDomain,method='max_min')) # Õı¸ºÎŞÇî´ó´¦ÀíÎª×î´ó×îĞ¡Öµ
-    step2 = ("imputer", ImputerClass(continuous=continuousDomain,strategy='mean'))  # Á¬Ğø±äÁ¿È±Ê§Öµ´¦Àí
-    step3 = ('onehot', OneHotClass(catego=categoricalDomain, miss='missing')) # Àà±ğÌØÕ÷¶ÀÈÈ±àÂë
-    step4 = ('MinMaxScaler', minmaxScalerClass(cols=[],target="Response"))  # ×î´ó×îĞ¡Öµ¹éÒ»»¯
+    # ä¸²è¡Œæµæ°´ä½œä¸š version 3minmaxScalerClass
+    step1 = ('infinite', InfClass(continuous=continuousDomain,method='max_min')) # æ­£è´Ÿæ— ç©·å¤§å¤„ç†ä¸ºæœ€å¤§æœ€å°å€¼
+    step2 = ("imputer", ImputerClass(continuous=continuousDomain,strategy='mean'))  # è¿ç»­å˜é‡ç¼ºå¤±å€¼å¤„ç†
+    step3 = ('onehot', OneHotClass(catego=categoricalDomain, miss='missing')) # ç±»åˆ«ç‰¹å¾ç‹¬çƒ­ç¼–ç 
+    step4 = ('MinMaxScaler', minmaxScalerClass(cols=[],target="Response"))  # æœ€å¤§æœ€å°å€¼å½’ä¸€åŒ–
 
     pipeline = Pipeline(steps=[step1,step2,step3,step4])
     newdata = pipeline.fit_transform(data)
     
-¼ÓÈëivÖµ¼ÆËã:
+åŠ å…¥ivå€¼è®¡ç®—:
 
     df = datasets.load_breast_cancer()
     ivobj = iv_pandas()
@@ -165,16 +165,16 @@
     x=datadf['1']
 
     woe, iv = ivobj.cal_woe_iv(datadf,['1','2'],'target',nsplit=10,event=1)
-    print(iv) # iv½á¹ûÊÇ {'1': 1.2674164699321071, '2': 2.9048936041315248}
+    print(iv) # ivç»“æœæ˜¯ {'1': 1.2674164699321071, '2': 2.9048936041315248}
     
-# ¸üĞÂ 20180110
+# æ›´æ–° 20180110
 
-unixÊ±¼ä´ÁÖ¸¶¨Ê±Çø×ª»»
+unixæ—¶é—´æˆ³æŒ‡å®šæ—¶åŒºè½¬æ¢
 
     from project_demo.tools.timeParse import *
     
     tz_utc_0 = datetime.timezone(datetime.timedelta(hours=0))
     tz_utc_8 = datetime.timezone(datetime.timedelta(hours=8))
-    print(unix2datetime(1503676813732,tz_utc_0,'s')) # ×ª»»Îª0Ê±Çø,µ¥Î»Ãë
-    print(unix2datetime(1503676813732,tz_utc_8,'ms')) # ×ª»¯Îª¶«°ËÇø£¬µ¥Î»ºÁÃë
+    print(unix2datetime(1503676813732,tz_utc_0,'s')) # è½¬æ¢ä¸º0æ—¶åŒº,å•ä½ç§’
+    print(unix2datetime(1503676813732,tz_utc_8,'ms')) # è½¬åŒ–ä¸ºä¸œå…«åŒºï¼Œå•ä½æ¯«ç§’
     
