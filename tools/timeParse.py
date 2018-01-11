@@ -192,12 +192,19 @@ def unix2datetime(t,tz,unit="s"):
         t = int(t)
     except:
         return "format error"
-    
-    if unit=='s':
-        return datetime.datetime.fromtimestamp(t,tz=tz)
-    else:
-        return datetime.datetime.fromtimestamp(t/1000,tz=tz)
 
+    if unit=='s':
+        return datetime.datetime.fromtimestamp(t,tz)
+    else:
+        return datetime.datetime.fromtimestamp(t/1000,tz)
+
+def string2datetime(t,format):
+    '''
+    t: "27-07-2017"  
+    format: "%d-%m-%Y"
+    return datetime
+    '''
+    return datetime.datetime.strptime(t,format)
 ##  测试代码 
 
 if __name__ == '__main__':
@@ -240,7 +247,7 @@ if __name__ == '__main__':
     print ('retList=%s'%retList)
     
     print ('--------  TEST FOR get_day_list() ----------------------------')
-    print(sastime2standardtime(20945))
+    print(sastime2standarddatetime(20945))
     
     print ('--------  TEST FOR get_month_daylist() ----------------------------')
     print(get_month_daylist(2017,4))
@@ -248,5 +255,8 @@ if __name__ == '__main__':
     print('--------  TEST FOR unix2datetime ----------------------------')
     tz_utc_0 = datetime.timezone(datetime.timedelta(hours=0))
     tz_utc_8 = datetime.timezone(datetime.timedelta(hours=8))
-    print(unix2datetime(1503676813732,tz_utc_0))
-    print(unix2datetime(1503676813732,tz_utc_8))
+    print(unix2datetime(1503676813732,tz=tz_utc_0,unit='ms'))
+    print(unix2datetime(1503676813732,tz=tz_utc_8,unit='ms'))
+    
+    print('--------  TEST FOR string2datetime ----------------------------')
+    print(string2datetime('2017-03-15',"%Y-%m-%d"))
