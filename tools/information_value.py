@@ -155,6 +155,22 @@ class WOE:
             mask = np.in1d(x, x1)
             res[mask] = (i + 1)
         return res
+    
+    def define_discrete(self, x, xsplit):
+        '''
+        Discrete the input 1-D numpy array using 5 equal percentiles
+        :param x: 1-D numpy array
+        :return: discreted 1-D numpy array
+        '''
+        res = np.array([0] * x.shape[-1], dtype=int)
+        for i in range(1,len(xsplit)):
+            point1 = xsplit[i-1]
+            point2 = xsplit[i]
+
+            x1 = x[((x >= point1) & (x < point2))]
+            mask = np.in1d(x, x1)
+            res[mask] = i
+        return res
 
     @property
     def WOE_MIN(self):
