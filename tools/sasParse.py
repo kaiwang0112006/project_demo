@@ -1,5 +1,5 @@
 # -*-coding: utf-8-*-
-class SAS7BDAT_self(SAS7BDAT):
+class SAS7BDAT_free(SAS7BDAT):
     def head_to_data_frame(self,n):
         import pandas as pd
         count = 0
