@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 import pymongo
-
+import traceback
 class MongoConnect(object):
     def __init__(self, host, port):
         self.host = host 
