@@ -17,4 +17,5 @@ class SAS7BDAT_free(SAS7BDAT):
         with open(filename,'w') as fout:
             for eachline in self.readlines():
                 line = [str(i) for i in eachline]
-                fout.write(",".join(line))
+                fout.write(",".join(line)+'\n')
+
