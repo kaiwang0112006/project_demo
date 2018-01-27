@@ -30,7 +30,7 @@ def jieba_cut(sentence,keywords=[],empty='NA'):
     s_in = ''.join([s for s in st])
     seg = [s for s in list(jieba.cut(s_in.encode('utf-8'))) if len(s)>1]
     if len(keywords)>0:
-        seg_list = [s for s in seg if s in keywords] # 只保留关键词
+        seg_list = [s for s in seg if s in keywords] # 鍙繚鐣欏叧閿瘝
     else:
         seg_list = copy.deepcopy(seg)
 
@@ -65,7 +65,7 @@ def jieba_cut_3(sentence,keywords=[],empty='NA',stopwordsfile='',definefile=''):
     seg = [s for s in list(jieba.cut(sentence)) if len(s)>1 and s not in stopwords and (u'\u4e00' <= s <= u'\u9fff') and s not in num_list]
 
     if len(keywords)>0:
-        seg_list = [s for s in seg if s in keywords] # 只保留关键词
+        seg_list = [s for s in seg if s in keywords] # 鍙繚鐣欏叧閿瘝
     else:
         seg_list = copy.deepcopy(seg)
     
@@ -95,7 +95,7 @@ def jieba_cut_3_noun(sentence,keywords=[],empty='NA'):
 
     seg = [s for s in list(jieba.cut(sentence)) if len(s)>1 and s not in stopwords and (u'\u4e00' <= s <= u'\u9fff') and s not in num_list]
     if len(keywords)>0:
-        seg_list = [s for s in seg if s in keywords] # 只保留关键词
+        seg_list = [s for s in seg if s in keywords] # 鍙繚鐣欏叧閿瘝
     else:
         seg_list = copy.deepcopy(seg)
 
