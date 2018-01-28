@@ -6,6 +6,7 @@ from .multi_apply import *
 import os
 import jieba.posseg as pseg
 
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TAOBAOFILE = os.path.join(BASE_DIR, 'userdicts', 'taobao.txt')
 STOPWORDSFILE = os.path.join(BASE_DIR, 'userdicts', 'stopwords.txt')
