@@ -177,4 +177,18 @@ unix时间戳指定时区转换
     tz_utc_8 = datetime.timezone(datetime.timedelta(hours=8))
     print(unix2datetime(1503676813732,tz_utc_0,'s')) # 转换为0时区,单位秒
     print(unix2datetime(1503676813732,tz_utc_8,'ms')) # 转化为东八区，单位毫秒
+
+sas时间转换函数的名称做调整
+
+# 更新 20180128
+
+添加mongodb的数据库连接对象，如下面用法
+
+    from project_demo.tools.dbUtil import *
+
+    connObj = MongoConnect('localhost', 27017)
+    connObj.connect()
+    connObj.authdb('cuishou', 'dbuser', 'readonly')
     
+    textcol = connObj.db['text_less']   
+    result = textcol.find() 
