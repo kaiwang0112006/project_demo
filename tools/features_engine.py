@@ -315,7 +315,7 @@ class label_encoder_sk(BaseEstimator, TransformerMixin):
         {feature1:{label1:1,label2:2}, feature2:{label1:1,label2:2}...}
         '''
         if len(self.cols) == 0:
-            self.cols = df.columns
+            self.cols = X.columns
         self.class_index = {}
         for f in self.cols:
             uf = X[f].unique()
