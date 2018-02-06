@@ -54,7 +54,7 @@ class mysqldbParse(object):
     def close(self):
         self.conn.close()
         
-def sqlserverParse(object):
+class sqlserverParse(object):
     def __init__(self, host='', user='', passwd='', dbName=''):
         self.host = host
         self.user = user
