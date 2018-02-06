@@ -4,6 +4,7 @@ import pandas as pd
 import pymongo
 import traceback
 import pyodbc
+import pymysql
 
 class MongoConnect(object):
     def __init__(self, host, port):
