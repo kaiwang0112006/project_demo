@@ -62,8 +62,7 @@ class sqlserverParse(object):
         self.dbName = dbName
         
     def conn_connect(self):
-        self.conn = pyodbc.connect('DRIVER=(ODBC DRIVER 13 for SQL Server);SERVER='+self.host+';DATABASE='+
-                                   self.dbName+';UID='+self.user+';PWD='+self.passwd)
+        self.conn = pyodbc.connect('DRIVER={ODBC DRIVER 13 for SQL Server};SERVER='+self.host+';DATABASE='+self.dbName+';UID='+self.user+';PWD='+self.passwd)
         
 
 
