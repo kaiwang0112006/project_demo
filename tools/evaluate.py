@@ -76,4 +76,44 @@ class iv_pandas(object):
             self.iv[f] = iv
             self.woe[f] = woe
         return self.woe, self.iv
-            
+
+class psi:
+    def __init__(self):
+        self.mdl_hist = []
+        self.mdl_bin_edges = []
+    
+    def __fit(self,x,bins='fd',box=True):
+        '''
+        self.mdl_hist is the number of sample in each box
+        '''
+        if box:
+            hist, bin_edges = np.histogram(x,bins=bins)
+            hist = np.array([x/np.sum(hist) for x in hist])
+        else:
+            hist = Counter(x)
+            bin_edges = None
+        return hist, bin_edges
+        
+    def fit_mdl(self,x,box=True):
+        self.mdl_hist, self.mdl_bin_edges = self.__fit(x,box=box)
+        self.box = box
+        return self
+    
+    def cal(self,y):
+        self.valid_hist, valid_bin_edges = self.__fit(y,bins=self.mdl_bin_edges,box=self.box)
+        if not self.box:
+            mdl_hist = []
+            valid_hist = []
+            for k in self.mdl_hist:
+                mdl_hist.append(self.mdl_hist[k])
+                try:
+                    valid_hist.append(self.valid_hist[k])
+                except:
+                    valid_hist.append(0)
+            mdl_hist = np.array([i/np.sum(mdl_hist) for i in mdl_hist])
+            valid_hist = np.array([i/np.sum(valid_hist) for i in valid_hist])
+        else:
+            valid_hist = self.valid_hist
+            mdl_hist = self.mdl_hist
+
+        return np.sum((valid_hist-mdl_hist)*np.log(1e-9 + valid_hist/mdl_hist))        
