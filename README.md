@@ -192,3 +192,16 @@ sas时间转换函数的名称做调整
     
     textcol = connObj.db['text_less']   
     result = textcol.find() 
+
+# 更新20180426
+
+计算ks:
+
+    ksobj = ks_statistic(yprob=y_pred_prob, ytrue=y_valid)
+    ksobj.cal_ks()
+    print('train ks=%s' % str(ksobj.ks))
+    ksobj.cal_ks_with_plot(plot="ks_test.png") #画ks曲线
+
+修复iv计算的bug
+ 
+     
