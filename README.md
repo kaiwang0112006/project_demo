@@ -197,11 +197,18 @@ sas时间转换函数的名称做调整
 
 计算ks:
 
+    from project_demo.tools.evaluate import *
     ksobj = ks_statistic(yprob=y_pred_prob, ytrue=y_valid)
     ksobj.cal_ks()
     print('train ks=%s' % str(ksobj.ks))
     ksobj.cal_ks_with_plot(plot="ks_test.png") #画ks曲线
 
 修复iv计算的bug
+
+psi计算:
+
+    from project_demo.tools.evaluate import *
+    psiobj = psi()
+    p = psiobj.fit_mdl([1, 0, 1, 0, 1, 0, 0],box=False).cal([1, 0, 1, 0, 1, 1, 1])
  
      
