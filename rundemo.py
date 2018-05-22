@@ -84,8 +84,8 @@ def feature_engine_test():
 
     
 def main():
-    feature_engine_test()
-    exit(0)
+    #feature_engine_test()
+
     df = datasets.load_breast_cancer()
     ivobj = iv_pandas()
     datadf = pd.DataFrame(df.data,columns=[str(i) for i in range(30)])
@@ -93,7 +93,10 @@ def main():
     #print(datadf.head())
     x=datadf['1']
 
-    woe, iv = ivobj.cal_woe_iv(datadf,['1','2'],'target',nsplit=10,event=1)
+    woe, iv = ivobj.cal_woe_iv_by_x(datadf,['1','2'],'target',nsplit=10,event=1)
+    print(woe)
+    print(iv)
+    woe, iv = ivobj.cal_woe_iv_by_y(datadf,['1','2'],'target',nsplit=10,event=1)
     print(woe)
     print(iv)
     

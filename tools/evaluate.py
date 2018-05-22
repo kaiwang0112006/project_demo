@@ -6,6 +6,7 @@ from scipy.stats import ks_2samp
 import matplotlib.pyplot as plt
 from collections import Counter
 import os 
+from .information_value import *
 #os.environ['QT_QPA_PLATFORM']='offscreen'
 
 class ks_statistic(object):
@@ -88,6 +89,9 @@ class iv_pandas(object):
         self.calobj = WOE()
 
     def cal_woe_iv(self,df,cols,target,nsplit=10,event=1):
+        '''
+        binning by split feature into equal n part (nsplit)
+        '''
         self.woe = {}
         self.iv = {}
         df = df.reset_index(drop=True)
@@ -144,6 +148,8 @@ class psi:
         return np.sum((valid_hist-mdl_hist)*np.log(1e-9 + valid_hist/mdl_hist))        
 
 if __name__=="__main__":
+    a = iv_pandas()
+    
     ksobj = ks_statistic(ytrue=[1, 0, 1, 0, 1, 0, 0], yprob=[0.9, 0.8, 0.7, 0.7, 0.6, 0.5, 0.4])
     #ksobj.cal_ks_with_plot(file="D:/test.png",plot=True)
     

@@ -2,6 +2,7 @@ import numpy as np
 import math
 from scipy import stats
 from sklearn.utils.multiclass import type_of_target
+from collections import defaultdict
 
 class WOE:
     def __init__(self):
@@ -156,6 +157,27 @@ class WOE:
             res[mask] = (i + 1)
         return res
     
+    def discrete_y(self, x, y, nsplit=10):
+        '''
+        Discrete the input 1-D numpy array using equal percentiles of y
+        :param x: 1-D numpy array
+        :return: discreted 1-D numpy array
+        '''
+        res = np.array([0] * x.shape[-1], dtype=int)
+        hist, binr = np.histogram(y, bins=nsplit)
+        y_ = np.digitize(y,binr)
+        
+        v = defaultdict(list)
+        for i,j in enumerate(y_):
+            v[j].append(x[i])
+        maskindex = 0
+        for index in v:
+            x1 = v[index]
+            mask = np.in1d(x, x1)
+            res[mask] = (maskindex + 1)  
+            maskindex += 1          
+        return res
+    
     def define_discrete(self, x, xsplit):
         '''
         Discrete the input 1-D numpy array using 5 equal percentiles
@@ -184,3 +206,10 @@ class WOE:
     @WOE_MAX.setter
     def WOE_MAX(self, woe_max):
         self._WOE_MAX = woe_max
+        
+if __name__ == '__main__':
+    a = WOE()
+    b = a.discrete(np.array([1,1,1,2,2,2,3,3,3,4,4,4]),5)
+    print(b)
+    c = a.discrete_y(np.array([1,1,1,2,2,2,3,3,3,4,4,4]),np.array([0.1,0.1,0.1,0.2,0.2,0.2,0.3,0.3,0.3,0.4,0.4,0.4]),3)
+    print(c)

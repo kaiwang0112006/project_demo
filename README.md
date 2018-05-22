@@ -210,5 +210,3 @@ psi计算:
     from project_demo.tools.evaluate import *
     psiobj = psi()
     p = psiobj.fit_mdl([1, 0, 1, 0, 1, 0, 0],box=False).cal([1, 0, 1, 0, 1, 1, 1])
- 
-     
