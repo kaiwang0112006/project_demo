@@ -211,4 +211,16 @@ psi计算:
     psiobj = psi()
     p = psiobj.fit_mdl([1, 0, 1, 0, 1, 0, 0],box=False).cal([1, 0, 1, 0, 1, 1, 1])
  
-     
+# 更新20180522
+
+更新iv计算：
+
+按变量n等分做分箱:
+
+    from project_demo.tools.evaluate import * 
+    woe, iv = ivobj.cal_woe_iv_by_x(datadf,['v1','v2'],'target',nsplit=10,event=1)
+    
+按y做n等分做分箱:
+
+    from project_demo.tools.evaluate import * 
+    woe, iv = ivobj.cal_woe_iv_by_y(datadf,['v1','v2'],'target',nsplit=10,event=1)
