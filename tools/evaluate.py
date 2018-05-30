@@ -4,9 +4,10 @@ import numpy as np
 from sklearn.metrics import *
 from scipy.stats import ks_2samp
 import matplotlib.pyplot as plt
-from collections import Counter
+from collections import *
 import os 
 from .information_value import *
+import copy
 #os.environ['QT_QPA_PLATFORM']='offscreen'
 
 class ks_statistic(object):
@@ -145,14 +146,75 @@ class psi:
             valid_hist = self.valid_hist
             mdl_hist = self.mdl_hist
 
-        return np.sum((valid_hist-mdl_hist)*np.log(1e-9 + valid_hist/mdl_hist))        
+        return np.sum((valid_hist-mdl_hist)*np.log(1e-9 + valid_hist/mdl_hist)) 
+    
+class varible_exam:
+    def __init__(self,value,target):     
+        self.value = value 
+        self.target = target 
+        self.bindata = OrderedDict()
+        self.npvalue = []
+    
+    def binning(self, bins=10):
+        hist, binr = np.histogram(self.value, bins=bins)
+        for i in range(len(binr)-1):
+            start = binr[i]
+            end = binr[i+1]+1 if i+1==len(binr) else binr[i+1]
+            self.bindata[(start,end)] = {'count':hist[i]}
+        self.bindata['total'] = {'count':len(self.value)}
+        return self
+
+    def good_bad_rate(self,good=1,bad=0):
+        if len(self.bindata)==0:
+            self = self.binning()
+        self.npvalue = np.array(self.value)
+        self.nptarget = np.array(self.target)
+        
+        self.allgood = len(self.nptarget[(self.nptarget == good)])
+        self.allbad = len(self.nptarget[(self.nptarget == bad)])
+        
+        for bin in self.bindata:
+            if bin!='total':
+                tg = self.nptarget[(self.npvalue>=bin[0]) & (self.npvalue<bin[1])]
+            else:
+                tg = copy.deepcopy(self.nptarget)
+            self.bindata[bin]['good'] = len(tg[tg==good])
+            self.bindata[bin]['bad'] = len(tg[tg==bad])
+            self.bindata[bin]['total'] = len(tg)
+            self.bindata[bin]['total_ratio'] = len(tg)/len(self.value)
+            self.bindata[bin]['bad_odds'] = self.bindata[bin]['bad']/len(tg)
+            self.bindata[bin]['%good'] = self.bindata[bin]['good']/self.allgood
+            self.bindata[bin]['%bad'] = self.bindata[bin]['bad']/self.allbad
+        return self
+    
+    def woe_iv(self,good=1,bad=0):
+        if len(self.npvalue)==0:
+            self = self.good_bad_rate(good,bad)
+        iv = 0
+        for bin in self.bindata:
+            if bin!='total':
+                tg = self.nptarget[(self.npvalue>=bin[0]) & (self.npvalue<bin[1])]
+            else:
+                tg = copy.deepcopy(self.nptarget)
+            self.bindata[bin]['woe'] = math.log((self.bindata[bin]['bad']/self.bindata[bin]['good'])/(self.allbad/self.allgood))
+            if bin=='total':
+                self.bindata[bin]['iv'] = iv
+            else:
+                self.bindata[bin]['iv'] = (self.bindata[bin]['bad']/self.allbad-
+                                           self.bindata[bin]['good']/self.allgood)*self.bindata[bin]['woe']
+                iv += self.bindata[bin]['iv']
+        return self
+    
+
+       
 
 if __name__=="__main__":
-    a = iv_pandas()
-    
-    ksobj = ks_statistic(ytrue=[1, 0, 1, 0, 1, 0, 0], yprob=[0.9, 0.8, 0.7, 0.7, 0.6, 0.5, 0.4])
-    #ksobj.cal_ks_with_plot(file="D:/test.png",plot=True)
-    
-    psiobj = psi()
-    p = psiobj.fit_mdl([1, 0, 1, 0, 1, 0, 0],box=False).cal([1, 0, 1, 0, 1, 1, 1])
-    print(p)
+    #a = iv_pandas()
+    #ksobj = ks_statistic(ytrue=[1, 0, 1, 0, 1, 0, 0], yprob=[0.9, 0.8, 0.7, 0.7, 0.6, 0.5, 0.4])
+
+    #psiobj = psi()
+    #p = psiobj.fit_mdl([1, 0, 1, 0, 1, 0, 0],box=False).cal([1, 0, 1, 0, 1, 1, 1])
+    #print(p)
+    import random
+    vobj = varible_exam(list(range(100)),[random.choice([1, 0]) for i in range(100)])
+    print(vobj.binning(10).good_bad_rate().woe_iv().bindata)

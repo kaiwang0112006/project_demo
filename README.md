@@ -210,3 +210,33 @@ psi计算:
     from project_demo.tools.evaluate import *
     psiobj = psi()
     p = psiobj.fit_mdl([1, 0, 1, 0, 1, 0, 0],box=False).cal([1, 0, 1, 0, 1, 1, 1])
+    
+# 更新20180530
+
+自动算出每个入模变量的分箱，WOE,IV，用于检查变量的风险模式
+
+	from project_demo.tools.evaluate import *
+	import random
+	vobj = varible_exam(list(range(100)),[random.choice([1, 0]) for i in range(100)])
+	
+	for key in vobj.binning(10).good_bad_rate().woe_iv().bindata:
+	    data = vobj.binning(10).good_bad_rate().woe_iv().bindata[key]
+	    if key == 'total':
+	        data['range'] = 'total'
+	    else:
+	        data['range'] = "%s-%s" % (str(key[0]),str(key[1]))
+	    print(data)
+
+output:
+
+	{'count': 10, 'good': 4, 'bad': 6, 'total': 10, 'total_ratio': 0.1, 'bad_odds': 0.6, '%good': 0.08888888888888889, '%bad': 0.10909090909090909, 'woe': 0.20479441264601306, 'iv': 0.004137260861535616, 'range': '0.0-9.9'}
+	{'count': 10, 'good': 4, 'bad': 6, 'total': 10, 'total_ratio': 0.1, 'bad_odds': 0.6, '%good': 0.08888888888888889, '%bad': 0.10909090909090909, 'woe': 0.20479441264601306, 'iv': 0.004137260861535616, 'range': '9.9-19.8'}
+	{'count': 10, 'good': 4, 'bad': 6, 'total': 10, 'total_ratio': 0.1, 'bad_odds': 0.6, '%good': 0.08888888888888889, '%bad': 0.10909090909090909, 'woe': 0.20479441264601306, 'iv': 0.004137260861535616, 'range': '19.8-29.700000000000003'}
+	{'count': 10, 'good': 4, 'bad': 6, 'total': 10, 'total_ratio': 0.1, 'bad_odds': 0.6, '%good': 0.08888888888888889, '%bad': 0.10909090909090909, 'woe': 0.20479441264601306, 'iv': 0.004137260861535616, 'range': '29.700000000000003-39.6'}
+	{'count': 10, 'good': 4, 'bad': 6, 'total': 10, 'total_ratio': 0.1, 'bad_odds': 0.6, '%good': 0.08888888888888889, '%bad': 0.10909090909090909, 'woe': 0.20479441264601306, 'iv': 0.004137260861535616, 'range': '39.6-49.5'}
+	{'count': 10, 'good': 4, 'bad': 6, 'total': 10, 'total_ratio': 0.1, 'bad_odds': 0.6, '%good': 0.08888888888888889, '%bad': 0.10909090909090909, 'woe': 0.20479441264601306, 'iv': 0.004137260861535616, 'range': '49.5-59.400000000000006'}
+	{'count': 10, 'good': 8, 'bad': 2, 'total': 10, 'total_ratio': 0.1, 'bad_odds': 0.2, '%good': 0.17777777777777778, '%bad': 0.03636363636363636, 'woe': -1.586965056582042, 'iv': 0.22441930093079385, 'range': '59.400000000000006-69.3'}
+	{'count': 10, 'good': 5, 'bad': 5, 'total': 10, 'total_ratio': 0.1, 'bad_odds': 0.5, '%good': 0.1111111111111111, '%bad': 0.09090909090909091, 'woe': -0.20067069546215124, 'iv': 0.004053953443679821, 'range': '69.3-79.2'}
+	{'count': 10, 'good': 2, 'bad': 8, 'total': 10, 'total_ratio': 0.1, 'bad_odds': 0.8, '%good': 0.044444444444444446, '%bad': 0.14545454545454545, 'woe': 1.1856236656577395, 'iv': 0.11975996622805447, 'range': '79.2-89.10000000000001'}
+	{'count': 10, 'good': 5, 'bad': 4, 'total': 9, 'total_ratio': 0.09, 'bad_odds': 0.4444444444444444, '%good': 0.1111111111111111, '%bad': 0.07272727272727272, 'woe': -0.4238142467763609, 'iv': 0.016267617553032035, 'range': '89.10000000000001-99.0'}
+	{'count': 100, 'good': 45, 'bad': 55, 'total': 100, 'total_ratio': 1.0, 'bad_odds': 0.55, '%good': 1.0, '%bad': 1.0, 'woe': 0.0, 'iv': 0.38932440332477386, 'range': 'total'}	    
