@@ -149,13 +149,20 @@ class psi:
         return np.sum((valid_hist-mdl_hist)*np.log(1e-9 + valid_hist/mdl_hist)) 
     
 class varible_exam:
-    def __init__(self,value,target):     
+    def __init__(self,value,target):  
+        '''
+        target: sample label
+        value: varible value
+        '''   
         self.value = value 
         self.target = target 
         self.bindata = OrderedDict()
         self.npvalue = []
     
     def binning(self, bins=10):
+        '''
+        bins: count of bin
+        '''
         hist, binr = np.histogram(self.value, bins=bins)
         for i in range(len(binr)-1):
             start = binr[i]
@@ -165,6 +172,10 @@ class varible_exam:
         return self
 
     def good_bad_rate(self,good=1,bad=0):
+        '''
+        good: label for sample as 'good'
+        bad: label for sample as 'bad'
+        '''
         if len(self.bindata)==0:
             self = self.binning()
         self.npvalue = np.array(self.value)
@@ -188,6 +199,10 @@ class varible_exam:
         return self
     
     def woe_iv(self,good=1,bad=0):
+        '''
+        good: label for sample as 'good'
+        bad: label for sample as 'bad'
+        '''
         if len(self.npvalue)==0:
             self = self.good_bad_rate(good,bad)
         iv = 0
@@ -204,9 +219,6 @@ class varible_exam:
                                            self.bindata[bin]['good']/self.allgood)*self.bindata[bin]['woe']
                 iv += self.bindata[bin]['iv']
         return self
-    
-
-       
 
 if __name__=="__main__":
     #a = iv_pandas()
