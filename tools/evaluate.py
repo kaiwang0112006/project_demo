@@ -163,11 +163,23 @@ class varible_exam:
         '''
         bins: count of bin
         '''
+        self.bindata = OrderedDict()
         hist, binr = np.histogram(self.value, bins=bins)
         for i in range(len(binr)-1):
             start = binr[i]
             end = binr[i+1]+1 if i+1==len(binr) else binr[i+1]
             self.bindata[(start,end)] = {'count':hist[i]}
+        self.bindata['total'] = {'count':len(self.value)}
+        return self
+    
+    def binning_with_range(self,bin=bin_range):
+        npvalue = np.array(self.value)
+        self.bindata = OrderedDict()
+        
+        for bins in bin_range:
+            start = bins[0]
+            end = bins[1]
+            self.bindata[(start,end)] = {'count':len(npvalue[(npvalue>=start) & (npvalue<end)])}
         self.bindata['total'] = {'count':len(self.value)}
         return self
 

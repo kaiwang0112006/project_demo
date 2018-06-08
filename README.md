@@ -217,7 +217,8 @@ psi计算:
 
 	from project_demo.tools.evaluate import *
 	import random
-	vobj = varible_exam(list(range(100)),[random.choice([1, 0]) for i in range(100)]) # list(range(100)) 对应变量值， [random.choice([1, 0]) for i in range(100)]对应标签
+	vobj = varible_exam(list(range(100)),[random.choice([1, 0]) for i in range(100)]) 
+	# list(range(100)) 对应变量值， [random.choice([1, 0]) for i in range(100)]对应标签
 	
 	for key in vobj.binning(10).good_bad_rate().woe_iv().bindata:
 	    data = vobj.binning(10).good_bad_rate().woe_iv().bindata[key]

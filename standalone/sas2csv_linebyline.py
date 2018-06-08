@@ -8,8 +8,9 @@
  
 """
 File: sas2csv.py
-Author: zhushiliang(zhushiliang@baidu.com)
+Author: wangkai
 Date: 2017/10/24 11:41:39
+Note: do task as sas file to csv with less memory cost
 """
 
 import pandas as pd
