@@ -259,4 +259,4 @@ if __name__ == '__main__':
     print(unix2datetime(1503676813732,tz=tz_utc_8,unit='ms'))
     
     print('--------  TEST FOR string2datetime ----------------------------')
-    print(string2datetime('2017-03-15',"%Y-%m-%d"))
+    print(string2datetime('2017-03-15 08:10:10',"%Y-%m-%d %H:%M:%s"))

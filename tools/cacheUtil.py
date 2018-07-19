@@ -21,8 +21,15 @@ def pickle_cache(file):
     return decorator
 
 if __name__ == '__main__':
+    import time
     @pickle_cache(file=r'D:\\test.pkl')
     def test():
+        for i in range(10):
+            time.sleep(1)
         return [1,2,4]
-    
-    print(test())
+    t = time.time()
+    test()
+    print(time.time()-t)
+    t = time.time()
+    test()
+    print(time.time()-t)
