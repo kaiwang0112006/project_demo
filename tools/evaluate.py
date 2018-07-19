@@ -172,7 +172,7 @@ class varible_exam:
         self.bindata['total'] = {'count':len(self.value)}
         return self
     
-    def binning_with_range(self,bin=bin_range):
+    def binning_with_range(self,bin_range):
         npvalue = np.array(self.value)
         self.bindata = OrderedDict()
         
