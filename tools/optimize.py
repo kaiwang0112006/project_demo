@@ -49,7 +49,7 @@ class bayes_ops(object):
         self.gp_params = gp_params
         
 
-    def _est_eval(self, **parms):
+    def est_eval(self, **parms):
         parms = parm_format(parms, self.intdeal, self.middledeal, self.maxdeal)
         for p in self.baseparms:
             parms[f] = self.baseparms[p]
@@ -60,11 +60,11 @@ class bayes_ops(object):
     def run(self, X,Y):
         self.X = X
         self.Y = Y
-        estmrBO = BayesianOptimization(self._est_eval, 
+        self.estmrBO = BayesianOptimization(self.est_eval,
                                       self.parms
                                      )
         
-        estmrBO.maximize(init_points=self.init_points, n_iter=self.num_iter, acq=self.acq, kappa=self.kappa, xi=self.xi,**self.gp_params)
-        self.baseparms = parm_format(estmrBO.res['max']['max_params'], self.intdeal, self.middledeal, self.maxdeal)
+        self.estmrBO.maximize(init_points=self.init_points, n_iter=self.num_iter, acq=self.acq, kappa=self.kappa, xi=self.xi,**self.gp_params)
+        self.baseparms = parm_format(self.estmrBO.max['params'], self.intdeal, self.middledeal, self.maxdeal)
 
      
