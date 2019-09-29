@@ -241,3 +241,18 @@ output:
 	{'count': 10, 'good': 2, 'bad': 8, 'total': 10, 'total_ratio': 0.1, 'bad_odds': 0.8, '%good': 0.044444444444444446, '%bad': 0.14545454545454545, 'woe': 1.1856236656577395, 'iv': 0.11975996622805447, 'range': '79.2-89.10000000000001'}
 	{'count': 10, 'good': 5, 'bad': 4, 'total': 9, 'total_ratio': 0.09, 'bad_odds': 0.4444444444444444, '%good': 0.1111111111111111, '%bad': 0.07272727272727272, 'woe': -0.4238142467763609, 'iv': 0.016267617553032035, 'range': '89.10000000000001-99.0'}
 	{'count': 100, 'good': 45, 'bad': 55, 'total': 100, 'total_ratio': 1.0, 'bad_odds': 0.55, '%good': 1.0, '%bad': 1.0, 'woe': 0.0, 'iv': 0.38932440332477386, 'range': 'total'}	    
+	
+# 更新20190929
+
+微聚部分代码融合，输出评分：
+
+	from project_demo.tools.wejoy.prob_scoring import *
+	pobj = prob_scoring(list_prob=list(train_y_pred)+list(y_pred), list_label=list(train_y)+list(test_y))
+	pobj.output_binning(fileout='main.obj')
+
+使用：
+
+	import dill
+	mappings = dill.load(open("bar.obj"))
+	step = 1.0 / (len(mappings["FUN"]) - 1)
+	y_scores = [mappings["FUN"][int((p_value + step / 2) / step)](p_value) for p_value in p_vals]

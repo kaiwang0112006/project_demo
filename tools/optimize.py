@@ -29,7 +29,7 @@ class bayes_ops(object):
     object that implement Bayesian Optimization using BayesianOptimization
     (https://github.com/fmfn/BayesianOptimization)
     '''
-    def __init__(self, estimator, param_grid, cv, intdeal, middledeal, maxdeal, score_func,baseparms={}, num_iter=100, init_points=15, n_iter=25, acq='ucb', kappa=2.576, xi=0.0, gp_params={"alpha": 1e-5, "n_restarts_optimizer": 2}):
+    def __init__(self, estimator, param_grid, cv, intdeal, middledeal, maxdeal, score_func,baseparms={}, num_iter=100, init_points=15, n_iter=25, acq='ucb', kappa=2.576, xi=0.0, gp_params={"alpha": 1e-5, "n_restarts_optimizer": 2}, others={}):
         '''
         estimator need to have fit function
         '''
@@ -47,12 +47,16 @@ class bayes_ops(object):
         self.kappa = kappa 
         self.xi = xi
         self.gp_params = gp_params
+        self.others = others
         
 
     def est_eval(self, **parms):
         parms = parm_format(parms, self.intdeal, self.middledeal, self.maxdeal)
         for p in self.baseparms:
             parms[f] = self.baseparms[p]
+        if len(self.others)>0:
+            for f in self.others:
+                parms[f] = self.others[f]
         estmr = self.estimator(**parms)
         score =  cross_val_score(estmr, X=self.X, y=self.Y, scoring=self.score_func, cv=self.cv, verbose=0, pre_dispatch=1)
         return np.array(score).mean()  
@@ -66,5 +70,6 @@ class bayes_ops(object):
         
         self.estmrBO.maximize(init_points=self.init_points, n_iter=self.num_iter, acq=self.acq, kappa=self.kappa, xi=self.xi,**self.gp_params)
         self.baseparms = parm_format(self.estmrBO.max['params'], self.intdeal, self.middledeal, self.maxdeal)
-
-     
+        if len(self.others)>0:
+            for f in self.others:
+                self.baseparms[f] = self.others[f]

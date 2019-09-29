@@ -205,7 +205,10 @@ class varible_exam:
             self.bindata[bin]['bad'] = len(tg[tg==bad])
             self.bindata[bin]['total'] = len(tg)
             self.bindata[bin]['total_ratio'] = len(tg)/len(self.value)
-            self.bindata[bin]['bad_odds'] = self.bindata[bin]['bad']/len(tg)
+            try:
+                self.bindata[bin]['odds'] = self.bindata[bin]['good']/self.bindata[bin]['bad']
+            except:
+                self.bindata[bin]['odds'] = -1
             self.bindata[bin]['%good'] = self.bindata[bin]['good']/self.allgood
             self.bindata[bin]['%bad'] = self.bindata[bin]['bad']/self.allbad
         return self
@@ -223,13 +226,19 @@ class varible_exam:
                 tg = self.nptarget[(self.npvalue>=bin[0]) & (self.npvalue<bin[1])]
             else:
                 tg = copy.deepcopy(self.nptarget)
-            self.bindata[bin]['woe'] = math.log((self.bindata[bin]['bad']/self.bindata[bin]['good'])/(self.allbad/self.allgood))
+            try:
+                self.bindata[bin]['woe'] = math.log((self.bindata[bin]['bad']/self.bindata[bin]['good'])/(self.allbad/self.allgood))
+            except:
+                self.bindata[bin]['woe'] = 0
             if bin=='total':
                 self.bindata[bin]['iv'] = iv
             else:
-                self.bindata[bin]['iv'] = (self.bindata[bin]['bad']/self.allbad-
-                                           self.bindata[bin]['good']/self.allgood)*self.bindata[bin]['woe']
-                iv += self.bindata[bin]['iv']
+                try:
+                    self.bindata[bin]['iv'] = (self.bindata[bin]['bad']/self.allbad-
+                                               self.bindata[bin]['good']/self.allgood)*self.bindata[bin]['woe']
+                    iv += self.bindata[bin]['iv']
+                except:
+                    self.bindata[bin]['iv'] = 0
         return self
 
 if __name__=="__main__":
