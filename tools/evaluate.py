@@ -123,7 +123,7 @@ class psi:
     def fit_mdl(self,x,box=True):
         '''
         Args:
-            box: whether or not treat a variable as categorical.
+            box: whether or not treat a variable as categorical. box=False means categorical feature.
         '''
         self.mdl_hist, self.mdl_bin_edges = self.__fit(x,box=box)
         self.box = box

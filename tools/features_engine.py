@@ -7,10 +7,12 @@ from sklearn.metrics import *
 from sklearn.preprocessing import *
 import copy
 from sklearn.base import *
-from sklearn.pipeline import FeatureUnion, _fit_one_transformer, _fit_transform_one, _transform_one 
+from sklearn.pipeline import FeatureUnion
 from sklearn.externals.joblib import Parallel, delayed
 from scipy import sparse
-
+import copy
+import math
+import itertools
 import logging
 logger = logging.getLogger(__name__)
 
@@ -265,7 +267,14 @@ class label_encoder_sk(BaseEstimator, TransformerMixin):
             return self.class_index[f][x]
         
 class minmaxScalerClass(BaseEstimator, TransformerMixin):
-    def __init__(self,cols,target):
+    def __init__(self,cols,target='',t='minmax'):
+        '''
+        归一化类
+        :param cols:
+        :param target:
+        :param t: 类型, type='minmax'是(x-min)/(xmax-xmin)归一化，type='std'是
+                        (x-mean)/std方式
+        '''
         self.cols = cols 
         self.target = target
         self.scaler = MinMaxScaler()
@@ -279,4 +288,89 @@ class minmaxScalerClass(BaseEstimator, TransformerMixin):
     def transform(self,X,y=None):
         X[self.cols] = self.scaler.transform(X[self.cols])
         return X
-        
+
+class f_combination():
+    def __init__(self,nums=[1,2,3]):
+        '''Exhaustive Feature Combination on one dimention
+
+        :param nums:sorted list.
+                    list of feature numbers. [1,2] means only generate new features based on
+                    one or two old features
+
+        '''
+        self.nums = sorted(nums)
+
+
+    def generate(self,df,keep=[],use=[]):
+        '''
+
+        :param df: dataframe. original dataframe
+        :param keep: list. features that do not involve in generating new features
+        :param addm: dict. added method expect default generation methods
+                     key is the num in self.nums, value is a list with method name and
+                     method function
+                     example: {1:['method1':max]}
+        :param use: feature to user for combination
+        :return: new dataframe with generated features
+        '''
+
+        self.keep = keep
+        if len(use)==0:
+            self.features = [f for f in df if f not in keep]
+        else:
+            self.features = copy.deepcopy(use)
+        #self.addm = addm
+        newdf = copy.deepcopy(df)
+
+        nummap = {1:self.__onecomb,2:self.__twocomb,3:self.__threecomb}
+
+        for i in self.nums:
+            newdf = nummap[i](newdf)
+        return newdf
+
+    def __onecomb(self,df):
+
+        mdict = {
+            'log':self.trylog,
+            'power2':self.power2,
+            'power3':self.power3
+        }
+
+        for f in self.features:
+            for m in mdict.keys():
+                newfeature = f + "_%s" % m
+                df[newfeature] = df[f].apply(lambda x:mdict[m](x))
+                break
+        return df
+
+    def __twocomb(self,df):
+        for combs in itertools.combinations(self.features, 2):
+
+            newfeature = "%s*%s" % (combs[0],combs[1])
+
+            df[newfeature] = df[combs[0]] * df[combs[1]]
+            #df[newfeature] = df.apply(lambda x: x[combs[0]]*x[combs[1]],axis=1)
+        return df
+
+    def __threecomb(self,df):
+        for combs in itertools.permutations(self.features, 3):
+            newfeature = "(%s+%s)*%s" % (combs[0],combs[1],combs[2])
+
+            df[newfeature] = (df[combs[0]]+df[combs[1]])*df[combs[2]]
+            #df[newfeature] = df.apply(lambda x: (x[combs[0]] + x[combs[1]] ) * x[combs[2]], axis=1)
+        return df
+
+    def power2(self,x):
+        return x*x
+
+    def power3(self,x):
+        return x*x*x
+
+    def twoby(self,x,y):
+        return x*y
+
+    def trylog(self,x):
+        try:
+            return math.log(x)
+        except:
+            return x
