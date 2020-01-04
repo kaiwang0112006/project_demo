@@ -146,96 +146,116 @@ class psi:
             valid_hist = self.valid_hist
             mdl_hist = self.mdl_hist
 
-        return np.sum((valid_hist-mdl_hist)*np.log(1e-9 + valid_hist/mdl_hist)) 
-    
+        return np.sum((valid_hist-mdl_hist)*np.log(1e-9 + valid_hist/mdl_hist))
+
+
 class varible_exam:
-    def __init__(self,value,target):  
+    def __init__(self, value, target, missing=None):
         '''
         target: sample label
         value: varible value
-        '''   
-        self.value = value 
-        self.target = target 
+        '''
+        self.value = np.array(value)
+        self.target = np.array(target)
         self.bindata = OrderedDict()
         self.npvalue = []
-    
+        self.missing = missing
+
     def binning(self, bins=10):
         '''
         bins: count of bin
         '''
         self.bindata = OrderedDict()
-        hist, binr = np.histogram(self.value, bins=bins)
-        for i in range(len(binr)-1):
+        value = self.value[self.value != self.missing]
+        if self.missing != None:
+            self.bindata[str(self.missing)] = {'count': len(self.value[self.value == self.missing])}
+        hist, binr = np.histogram(value, bins=bins)
+        for i in range(len(binr) - 1):
             start = binr[i]
-            end = binr[i+1]+1 if i+1==len(binr) else binr[i+1]
-            self.bindata[(start,end)] = {'count':hist[i]}
-        self.bindata['total'] = {'count':len(self.value)}
+            end = binr[i + 1] + 1 if i + 1 == len(binr) else binr[i + 1]
+            self.bindata[(start, end)] = {'count': hist[i]}
+        self.bindata['total'] = {'count': len(self.value)}
         return self
-    
-    def binning_with_range(self,bin_range):
-        npvalue = np.array(self.value)
+
+    def binning_with_range(self, bin_range):
+        npvalue = self.value[self.value != self.missing]
         self.bindata = OrderedDict()
-        
+        if self.missing != None:
+            self.bindata[str(self.missing)] = {'count': len(self.value[self.value == self.missing])}
         for bins in bin_range:
             start = bins[0]
             end = bins[1]
-            self.bindata[(start,end)] = {'count':len(npvalue[(npvalue>=start) & (npvalue<end)])}
-        self.bindata['total'] = {'count':len(self.value)}
+            self.bindata[(start, end)] = {'count': len(npvalue[(npvalue >= start) & (npvalue < end)])}
+        self.bindata['total'] = {'count': len(self.value)}
         return self
 
-    def good_bad_rate(self,good=1,bad=0):
+    def good_bad_rate(self, good=1, bad=0):
         '''
         good: label for sample as 'good'
         bad: label for sample as 'bad'
         '''
-        if len(self.bindata)==0:
+        if len(self.bindata) == 0:
             self = self.binning()
-        self.npvalue = np.array(self.value)
-        self.nptarget = np.array(self.target)
-        
+        self.npvalue = self.value[self.value != self.missing]
+        self.nptarget = np.array(self.target[self.value != self.missing])
+
         self.allgood = len(self.nptarget[(self.nptarget == good)])
         self.allbad = len(self.nptarget[(self.nptarget == bad)])
-        
+
         for bin in self.bindata:
-            if bin!='total':
-                tg = self.nptarget[(self.npvalue>=bin[0]) & (self.npvalue<bin[1])]
-            else:
-                tg = copy.deepcopy(self.nptarget)
-            self.bindata[bin]['good'] = len(tg[tg==good])
-            self.bindata[bin]['bad'] = len(tg[tg==bad])
+            if type(bin) == type((1, 2)):
+                tg = self.nptarget[(self.npvalue >= bin[0]) & (self.npvalue < bin[1])]
+            elif bin == 'total':
+                tg = copy.deepcopy(np.array(self.target))
+            elif type(bin) == type(''):
+                tg = copy.deepcopy(self.target[self.value == self.missing])
+
+            self.bindata[bin]['good'] = len(tg[tg == good])
+            self.bindata[bin]['bad'] = len(tg[tg == bad])
             self.bindata[bin]['total'] = len(tg)
-            self.bindata[bin]['total_ratio'] = len(tg)/len(self.value)
+            self.bindata[bin]['total_ratio'] = len(tg) / len(self.value)
             try:
-                self.bindata[bin]['odds'] = self.bindata[bin]['good']/self.bindata[bin]['bad']
+                self.bindata[bin]['odds'] = self.bindata[bin]['good'] / self.bindata[bin]['bad']
             except:
                 self.bindata[bin]['odds'] = -1
-            self.bindata[bin]['%good'] = self.bindata[bin]['good']/self.allgood
-            self.bindata[bin]['%bad'] = self.bindata[bin]['bad']/self.allbad
+            try:
+                self.bindata[bin]['%good'] = self.bindata[bin]['good'] / (
+                            self.bindata[bin]['good'] + self.bindata[bin]['bad'])
+            except:
+                self.bindata[bin]['%good'] = 0
+            try:
+                self.bindata[bin]['%bad'] = self.bindata[bin]['bad'] / (
+                            self.bindata[bin]['good'] + self.bindata[bin]['bad'])
+            except:
+                self.bindata[bin]['%bad'] = 0
         return self
-    
-    def woe_iv(self,good=1,bad=0):
+
+    def woe_iv(self, good=1, bad=0):
         '''
         good: label for sample as 'good'
         bad: label for sample as 'bad'
         '''
-        if len(self.npvalue)==0:
-            self = self.good_bad_rate(good,bad)
+        if len(self.npvalue) == 0:
+            self = self.good_bad_rate(good, bad)
         iv = 0
         for bin in self.bindata:
-            if bin!='total':
-                tg = self.nptarget[(self.npvalue>=bin[0]) & (self.npvalue<bin[1])]
-            else:
+            if type(bin) == type((1, 2)):
+                tg = self.nptarget[(self.npvalue >= bin[0]) & (self.npvalue < bin[1])]
+            elif bin == 'total':
                 tg = copy.deepcopy(self.nptarget)
+            elif type(bin) == type(''):
+                tg = copy.deepcopy(self.target[self.value == self.missing])
             try:
-                self.bindata[bin]['woe'] = math.log((self.bindata[bin]['bad']/self.bindata[bin]['good'])/(self.allbad/self.allgood))
+                self.bindata[bin]['woe'] = math.log(
+                    (self.bindata[bin]['bad'] / self.bindata[bin]['good']) / (self.allbad / self.allgood))
             except:
                 self.bindata[bin]['woe'] = 0
-            if bin=='total':
+            if bin == 'total':
                 self.bindata[bin]['iv'] = iv
             else:
                 try:
-                    self.bindata[bin]['iv'] = (self.bindata[bin]['bad']/self.allbad-
-                                               self.bindata[bin]['good']/self.allgood)*self.bindata[bin]['woe']
+                    self.bindata[bin]['iv'] = (self.bindata[bin]['bad'] / self.allbad -
+                                               self.bindata[bin]['good'] / self.allgood) * self.bindata[bin]['woe']
                     iv += self.bindata[bin]['iv']
                 except:
                     self.bindata[bin]['iv'] = 0
