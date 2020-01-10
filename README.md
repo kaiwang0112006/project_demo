@@ -215,18 +215,18 @@ psi计算:
 
 自动算出每个入模变量的分箱，WOE,IV，用于检查变量的风险模式
 
-	from project_demo.tools.evaluate import *
-	import random
-	vobj = varible_exam(list(range(100)),[random.choice([1, 0]) for i in range(100)]) 
-	# list(range(100)) 对应变量值， [random.choice([1, 0]) for i in range(100)]对应标签
-	
-	for key in vobj.binning(10).good_bad_rate().woe_iv().bindata:
-	    data = vobj.binning(10).good_bad_rate().woe_iv().bindata[key]
-	    if key == 'total':
-	        data['range'] = 'total'
-	    else:
-	        data['range'] = "%s-%s" % (str(key[0]),str(key[1]))
-	    print(data)
+    from project_demo.tools.evaluate import *
+    import random
+    vobj = varible_exam(list(range(100)),[random.choice([1, 0]) for i in range(100)]) 
+    # list(range(100)) 对应变量值， [random.choice([1, 0]) for i in range(100)]对应标签
+    
+    for key in vobj.binning(10).good_bad_rate().woe_iv().bindata:
+        data = vobj.binning(10).good_bad_rate().woe_iv().bindata[key]
+        if key == 'total':
+            data['range'] = 'total'
+        else:
+            data['range'] = "%s-%s" % (str(key[0]),str(key[1]))
+        print(data)
 
 output:
 
@@ -256,3 +256,28 @@ output:
 	mappings = dill.load(open("bar.obj"))
 	step = 1.0 / (len(mappings["FUN"]) - 1)
 	y_scores = [mappings["FUN"][int((p_value + step / 2) / step)](p_value) for p_value in p_vals]
+	
+# 更新20200110
+
+修改psi计算代码
+
+    from miloTools.tools.evaluate import *
+    import numpy as np
+    expected_array = np.random.normal(size=100)
+    actual_array = np.random.normal(size=100)
+    calculate_psi(expected_array,actual_array,buckets=10)
+    
+varible_exam中加入累计逾期和通过的计算
+
+from miloTools.tools.evaluate import *
+import random
+vobj = varible_exam(list(range(100)),[random.choice([1, 0]) for i in range(100)]) 
+# list(range(100)) 对应变量值， [random.choice([1, 0]) for i in range(100)]对应标签
+
+for key in vobj.binning(10).good_bad_rate().woe_iv().bindata:
+    data = vobj.binning(10).good_bad_rate().woe_iv().bindata[key]
+    if key == 'total':
+        data['range'] = 'total'
+    else:
+        data['range'] = "%s-%s" % (str(key[0]),str(key[1]))
+    print(data)

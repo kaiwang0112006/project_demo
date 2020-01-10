@@ -5,7 +5,7 @@ from sklearn.metrics import *
 from scipy.stats import ks_2samp
 import matplotlib.pyplot as plt
 from collections import *
-import os 
+import os
 from .information_value import *
 import copy
 #os.environ['QT_QPA_PLATFORM']='offscreen'
@@ -20,16 +20,16 @@ class ks_statistic(object):
         '''
         self.yprob = yprob
         self.ytrue = ytrue
-        
+
     def cal_ks_with_plot(self,file="ks.png",split=10,plot=False):
         if not plot:
             os.environ['QT_QPA_PLATFORM']='offscreen'
         df_score = pd.DataFrame(self.yprob)
-        df_good = pd.DataFrame(self.ytrue) 
+        df_good = pd.DataFrame(self.ytrue)
         df_score.columns = ['score']
         df_good.columns = ['good']
         df = pd.concat([df_score,df_good],axis=1)
-        
+
         df['bad'] = 1 - df.good
         bin = np.arange(0, 1.001, 0.05)
         df['bucket'] = pd.qcut(df.score, split, duplicates='drop')
@@ -42,10 +42,10 @@ class ks_statistic(object):
         aggdf['max_scr'] = grouped.max().score
         aggdf['bads'] = grouped.sum().bad # 计算每个区间bad的总数量
         aggdf['goods'] = grouped.sum().good
-        
+
         aggdf = (aggdf.sort_values(['min_scr'])).reset_index(drop=True) # 根据区间最小值排序
         aggdf['bad_cum_rate'] = np.round((aggdf.bads / df.bad.sum()).cumsum(), 4) # 计算bad样本累计概率
-        aggdf['good_cum_rate'] = np.round((aggdf.goods / df.good.sum()).cumsum(), 4) 
+        aggdf['good_cum_rate'] = np.round((aggdf.goods / df.good.sum()).cumsum(), 4)
         aggdf['ks'] = abs(np.round(((aggdf.bads / df.bad.sum()).cumsum() - (aggdf.goods / df.good.sum()).cumsum()), 4)) # 计算bad和good累计概率之差的绝对值
 
         self.ks = aggdf.ks.max()  # 求出ks
@@ -53,12 +53,12 @@ class ks_statistic(object):
         plt.figure()  # 创建绘图对象
         plt.plot(aggdf.min_scr, aggdf.bad_cum_rate, "g-", linewidth=1)  # 在当前绘图对象绘图（X轴，Y轴，蓝色虚线，线宽度）
         plt.plot(aggdf.min_scr, aggdf.good_cum_rate, "b-", linewidth=1)
-        
+
         x_abline = aggdf['min_scr'][aggdf['ks'] == aggdf['ks'].max()] # ks最大的min_scr
         y_abline1 = aggdf['bad_cum_rate'][aggdf['ks'] == aggdf['ks'].max()] # ks最大时bad_cum_rate
         y_abline2 = aggdf['good_cum_rate'][aggdf['ks'] == aggdf['ks'].max()]
-        plt.fill_between(x_abline, y_abline1, y_abline2, color = "red",linewidth=2)    
-        
+        plt.fill_between(x_abline, y_abline1, y_abline2, color = "red",linewidth=2)
+
         sub = "%s%s"%('ks = ',self.ks)
         plt.legend(title=sub,loc='lower right')
         plt.xlabel("Minimum score")  # X轴标签
@@ -68,14 +68,14 @@ class ks_statistic(object):
             plt.show()  # 显示图
         else:
             plt.savefig(file)
-    
+
     def cal_ks(self,pos_label=1):
         self.fpr, self.tpr, thresholds = roc_curve(y_score=self.yprob, y_true=self.ytrue, pos_label=pos_label)
 
         kss = [abs(self.tpr[i]-self.fpr[i]) for i in range(len(self.fpr))]
 
         self.ks = max(kss)
-        
+
 def cal_ks_scipy(y_pred, y_true):
     '''
     cal ks using scipy
@@ -103,51 +103,79 @@ class iv_pandas(object):
         return self.woe, self.iv
 
 
-class psi:
-    def __init__(self):
-        self.mdl_hist = []
-        self.mdl_bin_edges = []
-    
-    def __fit(self,x,bins='fd',box=True):
-        '''
-        self.mdl_hist is the number of sample in each box
-        '''
-        if box:
-            hist, bin_edges = np.histogram(x,bins=bins)
-            hist = np.array([x/np.sum(hist) for x in hist])
-        else:
-            hist = Counter(x)
-            bin_edges = None
-        return hist, bin_edges
-        
-    def fit_mdl(self,x,box=True):
-        '''
+def calculate_psi(expected, actual, buckettype='bins', buckets=10, axis=0):
+    '''Calculate the PSI (population stability index) across all variables
+    Args:
+       expected: numpy matrix of original values
+       actual: numpy matrix of new values, same size as expected
+       buckettype: type of strategy for creating buckets, bins splits into even splits, quantiles splits into quantile buckets
+       buckets: number of quantiles to use in bucketing variables
+       axis: axis by which variables are defined, 0 for vertical, 1 for horizontal
+    Returns:
+       psi_values: ndarray of psi values for each variable
+    Author:
+       Matthew Burke
+       github.com/mwburke
+       worksofchart.com
+    '''
+
+    def psi(expected_array, actual_array, buckets):
+        '''Calculate the PSI for a single variable
         Args:
-            box: whether or not treat a variable as categorical. box=False means categorical feature.
+           expected_array: numpy array of original values
+           actual_array: numpy array of new values, same size as expected
+           buckets: number of percentile ranges to bucket the values into
+        Returns:
+           psi_value: calculated PSI value
         '''
-        self.mdl_hist, self.mdl_bin_edges = self.__fit(x,box=box)
-        self.box = box
-        return self
-    
-    def cal(self,y):
-        self.valid_hist, valid_bin_edges = self.__fit(y,bins=self.mdl_bin_edges,box=self.box)
-        if not self.box:
-            mdl_hist = []
-            valid_hist = []
-            for k in self.mdl_hist:
-                mdl_hist.append(self.mdl_hist[k])
-                try:
-                    valid_hist.append(self.valid_hist[k])
-                except:
-                    valid_hist.append(0)
-            mdl_hist = np.array([i/np.sum(mdl_hist) for i in mdl_hist])
-            valid_hist = np.array([i/np.sum(valid_hist) for i in valid_hist])
-        else:
-            valid_hist = self.valid_hist
-            mdl_hist = self.mdl_hist
 
-        return np.sum((valid_hist-mdl_hist)*np.log(1e-9 + valid_hist/mdl_hist))
+        def scale_range (input, min, max):
+            input += -(np.min(input))
+            input /= np.max(input) / (max - min)
+            input += min
+            return input
 
+
+        breakpoints = np.arange(0, buckets + 1) / (buckets) * 100
+
+        if buckettype == 'bins':
+            breakpoints = scale_range(breakpoints, np.min(expected_array), np.max(expected_array))
+        elif buckettype == 'quantiles':
+            breakpoints = np.stack([np.percentile(expected_array, b) for b in breakpoints])
+
+        expected_percents = np.histogram(expected_array, breakpoints)[0] / len(expected_array)
+        actual_percents = np.histogram(actual_array, breakpoints)[0] / len(actual_array)
+
+        def sub_psi(e_perc, a_perc):
+            '''Calculate the actual PSI value from comparing the values.
+               Update the actual value to a very small number if equal to zero
+            '''
+            if a_perc == 0:
+                a_perc = 0.0001
+            if e_perc == 0:
+                e_perc = 0.0001
+
+            value = (e_perc - a_perc) * np.log(e_perc / a_perc)
+            return(value)
+
+        psi_value = np.sum(sub_psi(expected_percents[i], actual_percents[i]) for i in range(0, len(expected_percents)))
+
+        return(psi_value)
+
+    if len(expected.shape) == 1:
+        psi_values = np.empty(len(expected.shape))
+    else:
+        psi_values = np.empty(expected.shape[axis])
+
+    for i in range(0, len(psi_values)):
+        if len(psi_values) == 1:
+            psi_values = psi(expected, actual, buckets)
+        elif axis == 0:
+            psi_values[i] = psi(expected[:,i], actual[:,i], buckets)
+        elif axis == 1:
+            psi_values[i] = psi(expected[i,:], actual[i,:], buckets)
+
+    return(psi_values)
 
 class varible_exam:
     def __init__(self, value, target, missing=None):
@@ -168,25 +196,25 @@ class varible_exam:
         self.bindata = OrderedDict()
         value = self.value[self.value != self.missing]
         if self.missing != None:
-            self.bindata[str(self.missing)] = {'count': len(self.value[self.value == self.missing])}
+            self.bindata[str(self.missing)] = {'range':str(self.missing),'total': len(self.value[self.value == self.missing])}
         hist, binr = np.histogram(value, bins=bins)
         for i in range(len(binr) - 1):
             start = binr[i]
             end = binr[i + 1] + 1 if i + 1 == len(binr) else binr[i + 1]
-            self.bindata[(start, end)] = {'count': hist[i]}
-        self.bindata['total'] = {'count': len(self.value)}
+            self.bindata[(start, end)] = {'range':(start, end),'total': hist[i]}
+        self.bindata['total'] = {'total': len(self.value),'range':'total'}
         return self
 
     def binning_with_range(self, bin_range):
         npvalue = self.value[self.value != self.missing]
         self.bindata = OrderedDict()
-        if self.missing != None:
-            self.bindata[str(self.missing)] = {'count': len(self.value[self.value == self.missing])}
+        if self.missing != None and len(self.value[self.value == self.missing])!=0:
+            self.bindata[str(self.missing)] = {'range':str(self.missing),'total': len(self.value[self.value == self.missing])}
         for bins in bin_range:
             start = bins[0]
             end = bins[1]
-            self.bindata[(start, end)] = {'count': len(npvalue[(npvalue >= start) & (npvalue < end)])}
-        self.bindata['total'] = {'count': len(self.value)}
+            self.bindata[(start, end)] = {'range':(start, end),'total':len(npvalue[(npvalue >= start) & (npvalue < end)])}
+        self.bindata['total'] = {'total': len(self.value), 'range':'total'}
         return self
 
     def good_bad_rate(self, good=1, bad=0):
@@ -212,22 +240,32 @@ class varible_exam:
 
             self.bindata[bin]['good'] = len(tg[tg == good])
             self.bindata[bin]['bad'] = len(tg[tg == bad])
-            self.bindata[bin]['total'] = len(tg)
-            self.bindata[bin]['total_ratio'] = len(tg) / len(self.value)
+            #self.bindata[bin]['total'] = len(tg)
+            self.bindata[bin]['total%'] = len(tg) / len(self.value)
             try:
                 self.bindata[bin]['odds'] = self.bindata[bin]['good'] / self.bindata[bin]['bad']
             except:
                 self.bindata[bin]['odds'] = -1
             try:
-                self.bindata[bin]['%good'] = self.bindata[bin]['good'] / (
+                self.bindata[bin]['good%'] = self.bindata[bin]['good'] / (
                             self.bindata[bin]['good'] + self.bindata[bin]['bad'])
             except:
-                self.bindata[bin]['%good'] = 0
+                self.bindata[bin]['good%'] = 0
             try:
-                self.bindata[bin]['%bad'] = self.bindata[bin]['bad'] / (
+                self.bindata[bin]['bad%'] = self.bindata[bin]['bad'] / (
                             self.bindata[bin]['good'] + self.bindata[bin]['bad'])
             except:
-                self.bindata[bin]['%bad'] = 0
+                self.bindata[bin]['bad%'] = 0
+
+            try:
+                self.bindata[bin]['agg_bad%'] = self.bindata[bin]['bad'] / self.allbad
+            except:
+                self.bindata[bin]['agg_bad%'] = 0
+
+            try:
+                self.bindata[bin]['agg_pass%'] = self.bindata[bin]['total'] / (len(self.value))
+            except:
+                self.bindata[bin]['agg_pass%'] = 0
         return self
 
     def woe_iv(self, good=1, bad=0):
