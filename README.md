@@ -269,15 +269,59 @@ output:
     
 varible_exam中加入累计逾期和通过的计算
 
-from miloTools.tools.evaluate import *
-import random
-vobj = varible_exam(list(range(100)),[random.choice([1, 0]) for i in range(100)]) 
-# list(range(100)) 对应变量值， [random.choice([1, 0]) for i in range(100)]对应标签
+    from miloTools.tools.evaluate import *
+    import random
+    vobj = varible_exam(list(range(100)),[random.choice([1, 0]) for i in range(100)]) 
+    # list(range(100)) 对应变量值， [random.choice([1, 0]) for i in range(100)]对应标签
+    
+    for key in vobj.binning(10).good_bad_rate().woe_iv().bindata:
+        data = vobj.binning(10).good_bad_rate().woe_iv().bindata[key]
+        if key == 'total':
+            data['range'] = 'total'
+        else:
+            data['range'] = "%s-%s" % (str(key[0]),str(key[1]))
+        print(data)
+    
+output:
 
-for key in vobj.binning(10).good_bad_rate().woe_iv().bindata:
-    data = vobj.binning(10).good_bad_rate().woe_iv().bindata[key]
-    if key == 'total':
-        data['range'] = 'total'
-    else:
-        data['range'] = "%s-%s" % (str(key[0]),str(key[1]))
-    print(data)
+    {'range': '0.0-9.9', 'total': 10, 'good': 4, 'bad': 6, 'total%': 0.1, 'odds': 0.6666666666666666, 'good%': 0.4, 'bad%': 0.6, 'agg_bad%': 0.10714285714285714, 'agg_pass%': 0.1, 'woe': 0.16430305129127634, 'iv': 0.002667257326157082}
+    {'range': '9.9-19.8', 'total': 10, 'good': 6, 'bad': 4, 'total%': 0.1, 'odds': 1.5, 'good%': 0.6, 'bad%': 0.4, 'agg_bad%': 0.07142857142857142, 'agg_pass%': 0.1, 'woe': -0.6466271649250525, 'iv': 0.04198877694318522}
+    {'range': '19.8-29.700000000000003', 'total': 10, 'good': 5, 'bad': 5, 'total%': 0.1, 'odds': 1.0, 'good%': 0.5, 'bad%': 0.5, 'agg_bad%': 0.08928571428571429, 'agg_pass%': 0.1, 'woe': -0.2411620568168881, 'iv': 0.005872452682229416}
+    {'range': '29.700000000000003-39.6', 'total': 10, 'good': 2, 'bad': 8, 'total%': 0.1, 'odds': 0.25, 'good%': 0.2, 'bad%': 0.8, 'agg_bad%': 0.14285714285714285, 'agg_pass%': 0.1, 'woe': 1.1451323043030026, 'iv': 0.11153886080873401}
+    {'range': '39.6-49.5', 'total': 10, 'good': 4, 'bad': 6, 'total%': 0.1, 'odds': 0.6666666666666666, 'good%': 0.4, 'bad%': 0.6, 'agg_bad%': 0.10714285714285714, 'agg_pass%': 0.1, 'woe': 0.16430305129127634, 'iv': 0.002667257326157082}
+    {'range': '49.5-59.400000000000006', 'total': 10, 'good': 5, 'bad': 5, 'total%': 0.1, 'odds': 1.0, 'good%': 0.5, 'bad%': 0.5, 'agg_bad%': 0.08928571428571429, 'agg_pass%': 0.1, 'woe': -0.2411620568168881, 'iv': 0.005872452682229416}
+    {'range': '59.400000000000006-69.3', 'total': 10, 'good': 4, 'bad': 6, 'total%': 0.1, 'odds': 0.6666666666666666, 'good%': 0.4, 'bad%': 0.6, 'agg_bad%': 0.10714285714285714, 'agg_pass%': 0.1, 'woe': 0.16430305129127634, 'iv': 0.002667257326157082}
+    {'range': '69.3-79.2', 'total': 10, 'good': 6, 'bad': 4, 'total%': 0.1, 'odds': 1.5, 'good%': 0.6, 'bad%': 0.4, 'agg_bad%': 0.07142857142857142, 'agg_pass%': 0.1, 'woe': -0.6466271649250525, 'iv': 0.04198877694318522}
+    {'range': '79.2-89.10000000000001', 'total': 10, 'good': 3, 'bad': 7, 'total%': 0.1, 'odds': 0.42857142857142855, 'good%': 0.3, 'bad%': 0.7, 'agg_bad%': 0.125, 'agg_pass%': 0.1, 'woe': 0.6061358035703156, 'iv': 0.034439534293767934}
+    {'range': '89.10000000000001-99.0', 'total': 10, 'good': 5, 'bad': 4, 'total%': 0.09, 'odds': 1.25, 'good%': 0.5555555555555556, 'bad%': 0.4444444444444444, 'agg_bad%': 0.07142857142857142, 'agg_pass%': 0.1, 'woe': -0.46430560813109767, 'iv': 0.019597314628909967}
+    {'total': 100, 'range': 'total', 'good': 44, 'bad': 56, 'total%': 1.0, 'odds': 0.7857142857142857, 'good%': 0.44, 'bad%': 0.56, 'agg_bad%': 1.0, 'agg_pass%': 1.0, 'woe': 0.0, 'iv': 0.2692999409607124}
+    
+结合[autoBinning](https://github.com/kaiwang0112006/autoBinning)
+
+    from autoBinning.utils.forwardSplit import *
+    from miloTools.tools.evaluate import *
+    from IPython.display import display, HTML
+    
+    def invest_feature(x,y,init_split=20, num_split=4,minv=0):
+        t = forwardSplit(x, y,missing=-1)
+        t.fit(sby='woeiv',num_split=num_split,init_split=init_split,minv=minv,min_sample=300)
+    
+        vobj = varible_exam(x,y,missing=-1) 
+        if str(t.bins) == 'None' and len(set(x))>0 and len(set(x))<=10:
+            bindata = vobj.binning(bins=len(set(x))).good_bad_rate(good=0,bad=1).woe_iv().bindata
+        else:
+            bin_range = []
+            for i in range(len(t.bins)-1):
+                bin_range.append((t.bins[i], t.bins[i+1]))
+            bindata = vobj.binning_with_range(bin_range).good_bad_rate(good=0,bad=1).woe_iv().bindata
+        r = []
+        for key in bindata:
+            row = bindata[key]
+            r.append(row)
+        stat_df = pd.DataFrame(r)
+        return stat_df
+        
+    df = invest_feature(train_x['resolution_product'],train_y,num_split=4,init_split=0, minv=-1)
+    df = df[['range','bad%', 'good%', 'bad', 'good', 'iv', 'odds', 'total', 'total%', 'woe', 'agg_bad%', 'agg_pass%']]
+    display(HTML(df.to_html(index=False)))
+        
