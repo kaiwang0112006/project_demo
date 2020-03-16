@@ -233,10 +233,16 @@ class varible_exam:
         for bin in self.bindata:
             if type(bin) == type((1, 2)):
                 tg = self.nptarget[(self.npvalue >= bin[0]) & (self.npvalue < bin[1])]
+                if bin[1] == max(self.npvalue):
+                    tg_agg = self.nptarget[(self.npvalue <= bin[1])]
+                else:
+                    tg_agg = self.nptarget[(self.npvalue < bin[1])]
             elif bin == 'total':
                 tg = copy.deepcopy(np.array(self.target))
+                tg_agg = tg
             elif type(bin) == type(''):
                 tg = copy.deepcopy(self.target[self.value == self.missing])
+                tg_agg = tg
 
             self.bindata[bin]['good'] = len(tg[tg == good])
             self.bindata[bin]['bad'] = len(tg[tg == bad])
@@ -258,12 +264,12 @@ class varible_exam:
                 self.bindata[bin]['bad%'] = 0
 
             try:
-                self.bindata[bin]['agg_bad%'] = self.bindata[bin]['bad'] / self.allbad
+                self.bindata[bin]['agg_bad%'] = len(tg_agg[tg_agg == bad]) / len(tg_agg)
             except:
                 self.bindata[bin]['agg_bad%'] = 0
 
             try:
-                self.bindata[bin]['agg_pass%'] = self.bindata[bin]['total'] / (len(self.value))
+                self.bindata[bin]['agg_pass%'] = len(tg_agg)/ (len(self.value))
             except:
                 self.bindata[bin]['agg_pass%'] = 0
         return self

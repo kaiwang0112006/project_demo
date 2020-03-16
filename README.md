@@ -325,3 +325,24 @@ output:
     df = df[['range','bad%', 'good%', 'bad', 'good', 'iv', 'odds', 'total', 'total%', 'woe', 'agg_bad%', 'agg_pass%']]
     display(HTML(df.to_html(index=False)))
         
+# 更新20200220
+
+    y_pred_list = [round(i,2) for i in list(validset2['pred'])]
+    y_true = list(validset2['label'])
+    vobj = varible_exam(np.array(y_pred_list),y_true,missing=-1) 
+    t = simpleMethods(y_pred_list)
+    t.equalSize(20)
+    bins = t.bins
+    bin_range = []
+    for i in range(len(bins)-1):
+        bin_range.append((bins[i], bins[i+1]))
+    bindata = vobj.binning_with_range(bin_range).good_bad_rate(good=0,bad=1).woe_iv().bindata
+    #bindata = vobj.binning(10).good_bad_rate(good=0).woe_iv().bindata
+    datalist = []
+    for key in bindata:
+        data = bindata[key]
+        if data['range']!='total':
+            data['range'] = (round(float(data['range'][0]),2),round(float(data['range'][1]),2))
+        datalist.append(data)
+    rdf = pd.DataFrame(datalist,columns=['range','bad%','good%','bad','agg_bad%','good','iv','odds','total','total%','agg_pass%','woe'])
+    display(HTML(rdf.to_html(index=False)))
