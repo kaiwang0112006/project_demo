@@ -177,8 +177,9 @@ def calculate_psi(expected, actual, buckettype='bins', buckets=10, axis=0):
 
     return(psi_values)
 
+
 class varible_exam:
-    def __init__(self, value, target, missing=None):
+    def __init__(self, value, target, missing=None, categorical=False, reverse=False):
         '''
         target: sample label
         value: varible value
@@ -188,33 +189,59 @@ class varible_exam:
         self.bindata = OrderedDict()
         self.npvalue = []
         self.missing = missing
+        self.categorical = categorical
+        self.reverse = reverse
 
     def binning(self, bins=10):
         '''
         bins: count of bin
         '''
+        self.bindata_org = OrderedDict()
         self.bindata = OrderedDict()
         value = self.value[self.value != self.missing]
         if self.missing != None:
-            self.bindata[str(self.missing)] = {'range':str(self.missing),'total': len(self.value[self.value == self.missing])}
+            self.bindata[str(self.missing)] = {'range': str(self.missing),
+                                               'total': len(self.value[self.value == self.missing])}
         hist, binr = np.histogram(value, bins=bins)
-        for i in range(len(binr) - 1):
+
+        for i in range(len(binr)):
             start = binr[i]
             end = binr[i + 1] + 1 if i + 1 == len(binr) else binr[i + 1]
-            self.bindata[(start, end)] = {'range':(start, end),'total': hist[i]}
-        self.bindata['total'] = {'total': len(self.value),'range':'total'}
+            self.bindata_org[(start, end)] = {'range': (start, end), 'total': hist[i]}
+
+        if self.reverse:
+            for key in reversed(self.bindata_org.keys()):
+                self.bindata[key] = self.bindata_org[key]
+        else:
+            self.bindata = self.bindata_org
+        self.bindata['total'] = {'total': len(self.value), 'range': 'total'}
         return self
 
     def binning_with_range(self, bin_range):
         npvalue = self.value[self.value != self.missing]
+        self.bindata_org = OrderedDict()
         self.bindata = OrderedDict()
-        if self.missing != None and len(self.value[self.value == self.missing])!=0:
-            self.bindata[str(self.missing)] = {'range':str(self.missing),'total': len(self.value[self.value == self.missing])}
-        for bins in bin_range:
-            start = bins[0]
-            end = bins[1]
-            self.bindata[(start, end)] = {'range':(start, end),'total':len(npvalue[(npvalue >= start) & (npvalue < end)])}
-        self.bindata['total'] = {'total': len(self.value), 'range':'total'}
+        if self.missing != None and len(self.value[self.value == self.missing]) != 0:
+            self.bindata[str(self.missing)] = {'range': str(self.missing),
+                                               'total': len(self.value[self.value == self.missing])}
+
+        if self.categorical:
+            for bins in bin_range:
+                self.bindata_org[tuple(bins)] = {'range': bins, 'total': len(npvalue[np.isin(npvalue, bins)])}
+        else:
+            for bins in bin_range:
+                start = bins[0]
+                end = bins[1]
+                self.bindata_org[(start, end)] = {'range': (start, end),
+                                                  'total': len(npvalue[(npvalue >= start) & (npvalue < end)])}
+
+        if self.reverse:
+            for key in reversed(self.bindata_org.keys()):
+                self.bindata[key] = self.bindata_org[key]
+        else:
+            self.bindata = self.bindata_org
+
+        self.bindata['total'] = {'total': len(self.value), 'range': 'total'}
         return self
 
     def good_bad_rate(self, good=1, bad=0):
@@ -229,49 +256,64 @@ class varible_exam:
 
         self.allgood = len(self.nptarget[(self.nptarget == good)])
         self.allbad = len(self.nptarget[(self.nptarget == bad)])
+        allbins = []
+        binrangekey = list(self.bindata.keys())
 
-        for bin in self.bindata:
-            if type(bin) == type((1, 2)):
-                tg = self.nptarget[(self.npvalue >= bin[0]) & (self.npvalue < bin[1])]
-                if bin[1] == max(self.npvalue):
-                    tg_agg = self.nptarget[(self.npvalue <= bin[1])]
+        for i, bins in enumerate(binrangekey):
+            if type(bins) == type((1, 2)):
+                if self.categorical:
+                    tg = self.nptarget[np.isin(self.npvalue, bins)]
+                    allbins += list(bins)
+                    tg_agg = self.nptarget[np.isin(self.npvalue, np.array(allbins))]  ########################3
                 else:
-                    tg_agg = self.nptarget[(self.npvalue < bin[1])]
-            elif bin == 'total':
+                    tg = self.nptarget[(self.npvalue >= bins[0]) & (self.npvalue < bins[1])]
+                    if self.reverse:
+                        tg_agg = self.nptarget[(self.npvalue >= bins[0])]
+                    else:
+                        if bins[1] == max(self.npvalue):
+                            tg_agg = self.nptarget[(self.npvalue <= bins[1])]
+                        else:
+                            tg_agg = self.nptarget[(self.npvalue < bins[1])]
+            elif bins == 'total':
                 tg = copy.deepcopy(np.array(self.target))
                 tg_agg = tg
-            elif type(bin) == type(''):
+            elif type(bins) == type(''):
                 tg = copy.deepcopy(self.target[self.value == self.missing])
                 tg_agg = tg
 
-            self.bindata[bin]['good'] = len(tg[tg == good])
-            self.bindata[bin]['bad'] = len(tg[tg == bad])
-            #self.bindata[bin]['total'] = len(tg)
-            self.bindata[bin]['total%'] = len(tg) / len(self.value)
+            self.bindata[bins]['good'] = len(tg[tg == good])
+            self.bindata[bins]['bad'] = len(tg[tg == bad])
+            # self.bindata[bin]['total'] = len(tg)
+            self.bindata[bins]['total%'] = len(tg) / len(self.value)
             try:
-                self.bindata[bin]['odds'] = self.bindata[bin]['good'] / self.bindata[bin]['bad']
+                self.bindata[bins]['odds'] = self.bindata[bins]['good'] / self.bindata[bins]['bad']
             except:
-                self.bindata[bin]['odds'] = -1
+                self.bindata[bins]['odds'] = -1
             try:
-                self.bindata[bin]['good%'] = self.bindata[bin]['good'] / (
-                            self.bindata[bin]['good'] + self.bindata[bin]['bad'])
+                self.bindata[bins]['good%'] = self.bindata[bins]['good'] / (
+                        self.bindata[bins]['good'] + self.bindata[bins]['bad'])
             except:
-                self.bindata[bin]['good%'] = 0
+                self.bindata[bins]['good%'] = 0
             try:
-                self.bindata[bin]['bad%'] = self.bindata[bin]['bad'] / (
-                            self.bindata[bin]['good'] + self.bindata[bin]['bad'])
+                self.bindata[bins]['bad%'] = self.bindata[bins]['bad'] / (
+                        self.bindata[bins]['good'] + self.bindata[bins]['bad'])
             except:
-                self.bindata[bin]['bad%'] = 0
+                self.bindata[bins]['bad%'] = 0
 
             try:
-                self.bindata[bin]['agg_bad%'] = len(tg_agg[tg_agg == bad]) / len(tg_agg)
+                self.bindata[bins]['agg_bad%'] = len(tg_agg[tg_agg == bad]) / len(tg_agg)
             except:
-                self.bindata[bin]['agg_bad%'] = 0
+                self.bindata[bins]['agg_bad%'] = 0
 
             try:
-                self.bindata[bin]['agg_pass%'] = len(tg_agg)/ (len(self.value))
+                self.bindata[bins]['agg_good%'] = len(tg_agg[tg_agg != bad]) / len(tg_agg)
             except:
-                self.bindata[bin]['agg_pass%'] = 0
+                self.bindata[bins]['agg_good%'] = 0
+
+            try:
+                self.bindata[bins]['agg_pass%'] = len(tg_agg) / (len(self.value))
+            except:
+                self.bindata[bins]['agg_pass%'] = 0
         return self
 
     def woe_iv(self, good=1, bad=0):
@@ -282,27 +324,35 @@ class varible_exam:
         if len(self.npvalue) == 0:
             self = self.good_bad_rate(good, bad)
         iv = 0
-        for bin in self.bindata:
-            if type(bin) == type((1, 2)):
-                tg = self.nptarget[(self.npvalue >= bin[0]) & (self.npvalue < bin[1])]
-            elif bin == 'total':
+
+        binrangekey = list(self.bindata.keys())
+        for i, bins in enumerate(binrangekey):
+            if type(bins) == type((1, 2)):
+                if self.categorical:
+                    tg = self.nptarget[np.isin(self.npvalue, bins)]
+                else:
+                    tg = self.nptarget[(self.npvalue >= bins[0]) & (self.npvalue < bins[1])]
+            elif bins == 'total':
                 tg = copy.deepcopy(self.nptarget)
-            elif type(bin) == type(''):
+            elif type(bins) == type(''):
                 tg = copy.deepcopy(self.target[self.value == self.missing])
             try:
-                self.bindata[bin]['woe'] = math.log(
-                    (self.bindata[bin]['bad'] / self.bindata[bin]['good']) / (self.allbad / self.allgood))
+                self.bindata[bins]['woe'] = math.log(
+                    (self.bindata[bins]['bad'] / self.bindata[bins]['good']) / (self.allbad / self.allgood))
             except:
-                self.bindata[bin]['woe'] = 0
-            if bin == 'total':
-                self.bindata[bin]['iv'] = iv
+                self.bindata[bins]['woe'] = 0
+            if bins == 'total':
+                self.bindata[bins]['iv'] = iv
             else:
                 try:
-                    self.bindata[bin]['iv'] = (self.bindata[bin]['bad'] / self.allbad -
-                                               self.bindata[bin]['good'] / self.allgood) * self.bindata[bin]['woe']
-                    iv += self.bindata[bin]['iv']
+                    self.bindata[bins]['iv'] = (self.bindata[bins]['bad'] / self.allbad -
+                                                self.bindata[bins]['good'] / self.allgood) * self.bindata[bins]['woe']
+                    iv += self.bindata[bins]['iv']
                 except:
-                    self.bindata[bin]['iv'] = 0
+                    self.bindata[bins]['iv'] = 0
+                self.bindata[bins]['iv'] = (self.bindata[bins]['bad'] / self.allbad -
+                                            self.bindata[bins]['good'] / self.allgood) * self.bindata[bins]['woe']
+                iv += self.bindata[bins]['iv']
         return self
 
 if __name__=="__main__":

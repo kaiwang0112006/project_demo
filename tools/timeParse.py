@@ -205,10 +205,19 @@ def string2datetime(t,format):
     return datetime
     '''
     return datetime.datetime.strptime(t,format)
+
+def timeformat_Transform(t, format_in, format_out):
+    t_ = datetime.datetime.strptime(t,format_in)
+    return t_.strftime(format_out)
+
 ##  测试代码 
 
 if __name__ == '__main__':
+    t = timeformat_Transform('2019/5/24','%Y/%m/%d','%Y-%m-%d')
+    print(t)
+    print(type(t))
 
+    '''
     print ('--------  TEST FOR getDateDiffInDay() -----------------------------')
     
     startDate = datetime.datetime.strptime('2010-07-01','%Y-%m-%d')
@@ -259,4 +268,5 @@ if __name__ == '__main__':
     print(unix2datetime(1503676813732,tz=tz_utc_8,unit='ms'))
     
     print('--------  TEST FOR string2datetime ----------------------------')
-    print(string2datetime('2017-03-15 08:10:10',"%Y-%m-%d %H:%M:%s"))
+    print(string2datetime('2017-03-15 08:10:10',"%Y-%m-%d %H:%M:%S.%f"))
+    '''
